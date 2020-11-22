@@ -21,12 +21,12 @@ class PostgresPool {
     this.pool = new Pool(db)
   }
 
-  async submit(text, values = []) {
-    return this.pool
-            .query(text, values)
-            .then(res => console.log(res.rows[0]))
-            .catch(err => console.error(err.stack))
-  }
+  // async submit(text, values = []) {
+  //   return this.pool
+  //           .query(text, values)
+  //           .then(res => console.log(res.rows[0]))
+  //           .catch(err => console.error(err.stack))
+  // }
 
   async submitTransaction(text, values = []) {
     const client = await this.pool.connect()

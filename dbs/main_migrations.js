@@ -18,7 +18,13 @@ async function mainDBMigrations() {
                                       )`
                                     )
 
-  await mainPgPool.submitTransaction(`CREATE TYPE usage_enum AS ENUM ('Personal','Academic','Business');
+  await mainPgPool.submitTransaction(`DO $$
+                                      BEGIN
+                                        IF NOT EXISTS (select * from pg_type where typname = 'usage_enum') THEN CREATE TYPE usage_enum AS ENUM ('Personal','Academic','Business');
+                                      END IF;
+                                      END;
+                                      $$
+                                      LANGUAGE plpgsql;
 
                                       CREATE TABLE IF NOT EXISTS posts (
                                         id SERIAL PRIMARY KEY NOT NULL,
@@ -28,14 +34,20 @@ async function mainDBMigrations() {
                                         purpose VARCHAR(128) NOT NULL,
                                         brief_description VARCHAR(128) NOT NULL,
                                         detailed_description TEXT NOT NULL,
-                                        links TEXT NOT NULL,
+                                        links TEXT,
+                                        created_at TIMESTAMP NOT NULL DEFAULT now()
+                                      )`
+                                    )
+
+  await mainPgPool.submitTransaction(`CREATE TABLE IF NOT EXISTS message_threads (
+                                        id SERIAL NOT NULL PRIMARY KEY,
                                         created_at TIMESTAMP NOT NULL DEFAULT now()
                                       )`
                                     )
 
   await mainPgPool.submitTransaction(`CREATE TABLE IF NOT EXISTS messages (
                                         id SERIAL NOT NULL PRIMARY KEY,
-                                        thread_id INT NOT NULL,
+                                        thread_id INT NOT NULL REFERENCES message_threads(id),
                                         account_id INT NOT NULL REFERENCES accounts(id),
                                         message TEXT NOT NULL,
                                         created_at TIMESTAMP NOT NULL DEFAULT now()
