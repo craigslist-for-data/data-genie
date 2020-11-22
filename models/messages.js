@@ -21,14 +21,15 @@ async function createMessage(messageContents) {
               ${accountId},
               '${message}')
             RETURNING id`
-    return mainPgPool.submitTransaction(query)
+    const result = await mainPgPool.submitTransaction(query)
+    return result.rows[0].id
   } catch (err) {
     console.error(err)
     return null
   }
 }
 
-async function getMessages(threadID) {
+async function getMessagesInThread(threadId) {
   return mainPgPool.pool
           .query(`SELECT * FROM messages WHERE thread_id = ${threadId}`)
           .then(res => res.rows)
@@ -38,5 +39,5 @@ async function getMessages(threadID) {
 module.exports = {
   createMessageThread,
   createMessage,
-  getMessages,
+  getMessagesInThread,
 }

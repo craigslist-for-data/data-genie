@@ -30,7 +30,7 @@ async function getPost(id) {
           .catch(err => console.error(err.stack))
 }
 
-async function getPosts(index, batchSize) {
+async function getPostsBatch(index, batchSize) {
   return mainPgPool.pool
           .query(`
             SELECT * from (
@@ -45,5 +45,5 @@ async function getPosts(index, batchSize) {
 module.exports = {
   createPost,
   getPost,
-  getPosts,
+  getPostsBatch,
 }
