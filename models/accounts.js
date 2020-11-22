@@ -2,22 +2,27 @@ const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringify } = require('../utilities')
 
 async function createAccount(accountDetails) {
-  const { username, name, email, phone, linkedin, github, ssrn, org, title } = accountDetails
-  query = `INSERT INTO accounts
-              (username, name, email, phone, linkedin, github, ssrn, org, title)
-            VALUES
-              ('${username}',
-              '${name}',
-              '${email}',
-              ${phone},
-              ${stringify(linkedin)},
-              ${stringify(github)},
-              ${stringify(ssrn)},
-              ${stringify(org)},
-              ${stringify(title)})
-            RETURNING id`
-  const result = await mainPgPool.submitTransaction(query)
-  return result.rows[0].id
+  try{
+    const { username, name, email, phone, linkedin, github, ssrn, org, title } = accountDetails
+    query = `INSERT INTO accounts
+                (username, name, email, phone, linkedin, github, ssrn, org, title)
+              VALUES
+                ('${username}',
+                '${name}',
+                '${email}',
+                ${phone},
+                ${stringify(linkedin)},
+                ${stringify(github)},
+                ${stringify(ssrn)},
+                ${stringify(org)},
+                ${stringify(title)})
+              RETURNING id`
+    const result = await mainPgPool.submitTransaction(query)
+    return result.rows[0].id
+  } catch (err) {
+    console.error(err.stack)
+    return null
+  }
 }
 
 async function getAccountInfo(accountId) {

@@ -1,19 +1,31 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 
 async function createMessageThread() {
-  return mainPgPool.submitTransaction(`INSERT INTO message_threads (created_at) VALUES (now())`)
+  try {
+    query = `INSERT INTO message_threads DEFAULT VALUES RETURNING id`
+    const result = await mainPgPool.submitTransaction(query)
+    return result.rows[0].id
+  } catch(error) {
+    console.error(error.stack)
+    return null
+  }
 }
 
 async function createMessage(messageContents) {
-  const { threadId, accountId, message } = messageContents
-  query = `INSERT INTO messages
-            (thread_id, account_id, message)
-          VALUES
-            (${threadId},
-            ${accountId},
-            '${message}')
-          RETURNING id`
-  return mainPgPool.submitTransaction(query)
+  try {
+    const { threadId, accountId, message } = messageContents
+    query = `INSERT INTO messages
+              (thread_id, account_id, message)
+            VALUES
+              (${threadId},
+              ${accountId},
+              '${message}')
+            RETURNING id`
+    return mainPgPool.submitTransaction(query)
+  } catch (err) {
+    console.error(err)
+    return null
+  }
 }
 
 async function getMessages(threadID) {

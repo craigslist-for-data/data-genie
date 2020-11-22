@@ -107,6 +107,39 @@ describe('Posts DB', function() {
   })
 })
 
+describe('Messages DB Tests', function() {
+  it(`Should...
+      1. Create a Message Thread in DB`, async function() {
+
+    // CREATE MESSAGE THREAD
+    const threadId = await createMessageThread()
+
+    
+    const messageContent = {
+
+    }
+    // CREATE NEW ACCOUNT IN DB
+    const id = await createAccount(accountDetails)
+    // GET NEW ACCOUNT ID FROM USERNAME
+    const accountId = await getAccountId(accountDetails.username)
+    // ENSURE IDS MATCH
+    accountId.should.equal(id)
+
+    // GET ACCOUNT INFO FROM ID
+    const account = await getAccountInfo(id)
+    // ENSURE ACCOUNT INFORMATION MATCHES WHAT WAS INSERTED INTO THE DB
+    account.id.should.equal(id)
+    account.username.should.equal(accountDetails.username)
+    account.name.should.equal(accountDetails.name)
+    account.email.should.equal(accountDetails.email)
+    account.phone.should.equal(accountDetails.phone)
+    should.not.exist(account.linkedin)
+    should.not.exist(account.github)
+    should.not.exist(account.ssrn)
+    account.org.should.equal(accountDetails.org)
+    account.title.should.equal(accountDetails.title)
+  })
+})
 
 module.exports = {
   createAccount,

@@ -2,20 +2,25 @@ const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringify } = require('../utilities')
 
 async function createPost(postContents) {
-  const { accountId, topic, usage, purpose, briefDesc, detailedDesc, links } = postContents
-  query = `INSERT INTO posts
-            (account_id, topic, usage, purpose, brief_description, detailed_description, links)
-          VALUES
-            (${accountId},
-            '${topic}',
-            '${usage}',
-            '${purpose}',
-            '${briefDesc}',
-            '${detailedDesc}',
-            ${stringify(links)})
-          RETURNING id`
-  const result = await mainPgPool.submitTransaction(query)
-  return result.rows[0].id
+  try{
+    const { accountId, topic, usage, purpose, briefDesc, detailedDesc, links } = postContents
+    query = `INSERT INTO posts
+              (account_id, topic, usage, purpose, brief_description, detailed_description, links)
+            VALUES
+              (${accountId},
+              '${topic}',
+              '${usage}',
+              '${purpose}',
+              '${briefDesc}',
+              '${detailedDesc}',
+              ${stringify(links)})
+            RETURNING id`
+    const result = await mainPgPool.submitTransaction(query)
+    return result.rows[0].id
+  } catch (err) {
+    console.error(err.stack)
+    return null
+  }
 }
 
 async function getPost(id) {
