@@ -29,10 +29,10 @@ async function getPosts(index, batchSize) {
   return mainPgPool.pool
           .query(`
             SELECT * from (
-              SELECT *, row_number() as row over (ORDER BY created_at desc) FROM posts
+              SELECT *, CAST(row_number() over (ORDER BY created_at desc) as int) as row FROM posts
             ) as tt
-            WHERE (row - 1)  / ${batchSize} between ${index - 1} and ${index}
-          )`)
+            WHERE (row - 1)  / ${batchSize} >= ${index - 1} AND (row - 1)  / ${batchSize} < ${index}
+            `)
           .then(res => res.rows)
           .catch(err => console.error(err.stack))
 }

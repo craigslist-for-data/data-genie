@@ -18,8 +18,11 @@ describe('Clear DB Data', function() {
 
 const username = 'test1'
 
-describe('Accounts DB', function() {
-  it('Should create Account + fetch the account id from username + match DB account info with account test info', async function() {
+describe('Accounts DB Tests', function() {
+  it(`Should...
+      1. Create an Account in DB
+      2. Fetch the Account id using username
+      3. Match DB Account info with account test info`, async function() {
     const accountDetails = {
       username:username,
       name:'Test User1',
@@ -55,7 +58,11 @@ describe('Accounts DB', function() {
 })
 
 describe('Posts DB', function() {
-  it('Should create a new Post + get Post by id + return correct content + return batches of posts', async function() {
+  it(`Should...
+      1. Create a new Post in DB
+      2. Get Post using id
+      3. Return correct Post content
+      4. Return batches of Posts`, async function() {
     // GET ACCOUNT FROM USERNAME
     const accountId = await getAccountId(username)
     const postContents = {
@@ -82,7 +89,20 @@ describe('Posts DB', function() {
     newPost.detailed_description.should.equal(postContents.detailedDesc)
     should.not.exist(newPost.links)
 
-    // TO DO: ADD TEST FOR GRABBING BATCHES OF POSTS
+    // CREATE A BATCH OF NEW POSTS
+    let i;
+    const batches = 3
+    const batchSize = 10
+    for (i = 0; i < batches * batchSize; i++) {
+      const id = await createPost(postContents)
+    }
+
+    // GET BATCHES OF N POSTS
+    for (i = 1; i < 3; i++) {
+      const postBatch = await getPosts(i, batchSize)
+      postBatch.length.should.equal(batchSize)
+      postBatch[0].row.should.equal(1+batchSize*(i-1))
+    }
 
   })
 })
