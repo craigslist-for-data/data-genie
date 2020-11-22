@@ -32,8 +32,9 @@ class PostgresPool {
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
-      await client.query(text, values)
+      const result = await client.query(text, values)
       await client.query('COMMIT')
+      return result
     } catch (err) {
       await client.query('ROLLBACK')
       console.error(err.stack)

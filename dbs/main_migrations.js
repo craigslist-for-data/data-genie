@@ -8,7 +8,7 @@ async function mainDBMigrations() {
                                         username VARCHAR(32) UNIQUE NOT NULL,
                                         name VARCHAR(64),
                                         email VARCHAR(128) UNIQUE NOT NULL,
-                                        phone BIGINT UNIQUE NOT NULL,
+                                        phone INTEGER UNIQUE NOT NULL,
                                         linkedin TEXT,
                                         github TEXT,
                                         ssrn TEXT,
@@ -28,7 +28,7 @@ async function mainDBMigrations() {
 
                                       CREATE TABLE IF NOT EXISTS posts (
                                         id SERIAL PRIMARY KEY NOT NULL,
-                                        account_id INT NOT NULL REFERENCES accounts(id),
+                                        account_id INTEGER NOT NULL REFERENCES accounts(id),
                                         topic VARCHAR(128) NOT NULL,
                                         usage usage_enum NOT NULL,
                                         purpose VARCHAR(128) NOT NULL,
@@ -47,8 +47,8 @@ async function mainDBMigrations() {
 
   await mainPgPool.submitTransaction(`CREATE TABLE IF NOT EXISTS messages (
                                         id SERIAL NOT NULL PRIMARY KEY,
-                                        thread_id INT NOT NULL REFERENCES message_threads(id),
-                                        account_id INT NOT NULL REFERENCES accounts(id),
+                                        thread_id INTEGER NOT NULL REFERENCES message_threads(id),
+                                        account_id INTEGER NOT NULL REFERENCES accounts(id),
                                         message TEXT NOT NULL,
                                         created_at TIMESTAMP NOT NULL DEFAULT now()
                                       )`
@@ -56,7 +56,7 @@ async function mainDBMigrations() {
 
   await mainPgPool.submitTransaction(`CREATE TABLE IF NOT EXISTS feedback (
                                         id SERIAL NOT NULL PRIMARY KEY,
-                                        account_id INT REFERENCES accounts(id),
+                                        account_id INTEGER REFERENCES accounts(id),
                                         message TEXT NOT NULL,
                                         created_at TIMESTAMP NOT NULL DEFAULT now()
                                       )`
@@ -64,7 +64,7 @@ async function mainDBMigrations() {
 
   await mainPgPool.submitTransaction(`CREATE TABLE IF NOT EXISTS invitations (
                                         id SERIAL NOT NULL PRIMARY KEY,
-                                        account_id INT REFERENCES accounts(id),
+                                        account_id INTEGER REFERENCES accounts(id),
                                         email VARCHAR(128) NOT NULL,
                                         created_at TIMESTAMP NOT NULL DEFAULT now()
                                       )`

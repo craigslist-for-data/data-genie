@@ -16,8 +16,8 @@ async function createAccount(accountDetails) {
               ${stringify(org)},
               ${stringify(title)})
             RETURNING id`
-  console.log(query)
-  return mainPgPool.submitTransaction(query)
+  const result = await mainPgPool.submitTransaction(query)
+  return result.rows[0].id
 }
 
 async function getAccountInfo(accountId) {
@@ -29,8 +29,8 @@ async function getAccountInfo(accountId) {
 
 async function getAccountId(username) {
   return mainPgPool.pool
-          .query(`SELECT id FROM accounts WHERE username = ${username}`)
-          .then(res => res.rows[0])
+          .query(`SELECT id FROM accounts WHERE username = '${username}'`)
+          .then(res => res.rows[0].id)
           .catch(err => console.error(err.stack))
 }
 

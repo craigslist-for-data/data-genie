@@ -12,16 +12,16 @@ async function createPost(postContents) {
             '${purpose}',
             '${briefDesc}',
             '${detailedDesc}',
-            ${stringify(links)}) 
+            ${stringify(links)})
           RETURNING id`
-  return mainPgPool.submitTransaction(
-                                    )
+  const result = await mainPgPool.submitTransaction(query)
+  return result.rows[0].id
 }
 
 async function getPost(id) {
   return mainPgPool.pool
           .query(`SELECT * FROM posts WHERE id = ${id}`)
-          .then(res => res.rows)
+          .then(res => res.rows[0])
           .catch(err => console.error(err.stack))
 }
 
