@@ -1,5 +1,5 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
-const { stringify } = require('../utilities')
+const { stringifyForPGInsert } = require('../utilities')
 
 async function createPost(postContents) {
   try{
@@ -8,12 +8,12 @@ async function createPost(postContents) {
               (account_id, topic, usage, purpose, brief_description, detailed_description, links)
             VALUES
               (${accountId},
-              '${topic}',
+              ${stringifyForPGInsert(topic)},
               '${usage}',
-              '${purpose}',
-              '${briefDesc}',
-              '${detailedDesc}',
-              ${stringify(links)})
+              ${stringifyForPGInsert(purpose)},
+              ${stringifyForPGInsert(briefDesc)},
+              ${stringifyForPGInsert(detailedDesc)},
+              ${stringifyForPGInsert(links)})
             RETURNING id`
     const result = await mainPgPool.submitTransaction(query)
     return result.rows[0].id

@@ -1,5 +1,5 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
-const { stringify } = require('../utilities')
+const { stringifyForPGInsert } = require('../utilities')
 
 async function createAccount(accountDetails) {
   try{
@@ -11,11 +11,11 @@ async function createAccount(accountDetails) {
                 '${name}',
                 '${email}',
                 ${phone},
-                ${stringify(linkedin)},
-                ${stringify(github)},
-                ${stringify(ssrn)},
-                ${stringify(org)},
-                ${stringify(title)})
+                ${stringifyForPGInsert(linkedin)},
+                ${stringifyForPGInsert(github)},
+                ${stringifyForPGInsert(ssrn)},
+                ${stringifyForPGInsert(org)},
+                ${stringifyForPGInsert(title)})
               RETURNING id`
     const result = await mainPgPool.submitTransaction(query)
     return result.rows[0].id

@@ -1,4 +1,5 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
+const { stringifyForPGInsert } = require('../utilities')
 
 async function createMessageThread() {
   try {
@@ -19,7 +20,7 @@ async function createMessage(messageContents) {
             VALUES
               (${threadId},
               ${accountId},
-              '${message}')
+              ${stringifyForPGInsert(message)})
             RETURNING id`
     const result = await mainPgPool.submitTransaction(query)
     return result.rows[0].id
