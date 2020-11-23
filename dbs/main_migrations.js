@@ -8,7 +8,7 @@ async function mainDBMigrations() {
                                         username VARCHAR(32) UNIQUE NOT NULL,
                                         name VARCHAR(64),
                                         email VARCHAR(128) UNIQUE NOT NULL,
-                                        phone INTEGER UNIQUE NOT NULL,
+                                        phone BIGINT UNIQUE NOT NULL,
                                         linkedin TEXT,
                                         github TEXT,
                                         ssrn TEXT,

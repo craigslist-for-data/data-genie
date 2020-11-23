@@ -7,6 +7,7 @@ const { authDBMigrations } = require('./dbs/auth_migrations')
 
 const app = express()
 app.use(cors())
+app.use(express.json())
 app.use('/index',index)
 app.use('/account',accounts)
 
@@ -17,5 +18,5 @@ app.listen(port, hostname, () => {
   console.log(`App running at http://${hostname}:${port}`)
 })
 
-// mainDBMigrations()
-// authDBMigrations()
+mainDBMigrations()
+authDBMigrations()

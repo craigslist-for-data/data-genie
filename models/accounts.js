@@ -20,8 +20,8 @@ async function storeAccount(accountDetails) {
     const result = await mainPgPool.submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
-    console.error(err.stack)
-    return null
+    console.error(err)
+    throw new Error(err)
   }
 }
 
