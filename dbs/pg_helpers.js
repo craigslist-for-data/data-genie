@@ -21,19 +21,13 @@ class PostgresPool {
     this.pool = new Pool(db)
   }
 
-  async submit(text, values = []) {
-    return this.pool
-            .query(text, values)
-            .then(res => console.log(res.rows[0]))
-            .catch(err => console.error(err.stack))
-  }
-
   async submitTransaction(text, values = []) {
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
-      await client.query(text, values)
+      const result = await client.query(text, values)
       await client.query('COMMIT')
+      return result
     } catch (err) {
       await client.query('ROLLBACK')
       console.error(err.stack)
