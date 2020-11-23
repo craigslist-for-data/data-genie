@@ -1,7 +1,7 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function createAccount(accountDetails) {
+async function storeAccount(accountDetails) {
   try{
     const { username, name, email, phone, linkedin, github, ssrn, org, title } = accountDetails
     query = `INSERT INTO accounts
@@ -40,7 +40,7 @@ async function getAccountId(username) {
 }
 
 module.exports = {
-  createAccount,
+  storeAccount,
   getAccountInfo,
   getAccountId,
 }

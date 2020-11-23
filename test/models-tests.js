@@ -1,10 +1,10 @@
 const should = require('chai').should()
 const expect = require('chai').expect
-const { createAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
-const { createMessageThread, createMessage,  getMessagesInThread } = require('../models/messages')
-const { createPost, getPost, getPostsBatch } = require('../models/posts')
-const { generateFeedback, getFeedback } = require('../models/feedback')
-const { createInvitiation, getInvitation } = require('../models/invitations')
+const { storeAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
+const { storeMessageThread, storeMessage,  getMessagesInThread } = require('../models/messages')
+const { storePost, getPost, getPostsBatch } = require('../models/posts')
+const { storeFeedback, getFeedback } = require('../models/feedback')
+const { storeInvitation, getInvitation } = require('../models/invitations')
 const { mainPgPool } = require('../dbs/pg_helpers')
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
@@ -38,7 +38,7 @@ describe('Accounts Models Tests', function() {
       org:'TEST',
       title:'TEST',
     }
-    const id = await createAccount(accountDetails)
+    const id = await storeAccount(accountDetails)
 
     // Fetch the Account id using username
     const accountId = await getAccountId(accountDetails.username)
@@ -82,7 +82,7 @@ describe('Posts Models Tests', function() {
       org:'TEST',
       title:'TEST',
     }
-    const accountId = await createAccount(accountDetails)
+    const accountId = await storeAccount(accountDetails)
 
     // Create a new Post in DB
     const postContents = {
@@ -94,7 +94,7 @@ describe('Posts Models Tests', function() {
       detailedDesc:'N/A',
       links:null,
     }
-    const id = await createPost(postContents)
+    const id = await storePost(postContents)
 
     // Get Post using id
     const newPost = await getPost(id)
@@ -113,7 +113,7 @@ describe('Posts Models Tests', function() {
     const batches = 3
     const batchSize = 10
     for (i = 0; i < batches * batchSize; i++) {
-      const id = await createPost(postContents)
+      const id = await storePost(postContents)
     }
     // Return Batches of Posts
     for (i = 1; i < 3; i++) {
@@ -135,12 +135,12 @@ describe('Messages DB Tests', function() {
       - Insert additional message and ensure it was added to the thread`, async function() {
 
     // Create & Check Message Threads in the DB
-    const threadId1 = await createMessageThread()
+    const threadId1 = await storeMessageThread()
     const maxThreadId = await mainPgPool.pool
                                 .query(`SELECT max(id) FROM message_threads`)
                                 .then(res => res.rows[0].max)
                                 .catch(err => console.error(err.stack))
-    const threadId2 = await createMessageThread()
+    const threadId2 = await storeMessageThread()
     expect(threadId1).to.equal(maxThreadId)
     expect(threadId2).to.be.above(maxThreadId)
 
@@ -156,7 +156,7 @@ describe('Messages DB Tests', function() {
       org:'TEST',
       title:'TEST',
     }
-    const accountId = await createAccount(accountDetails)
+    const accountId = await storeAccount(accountDetails)
 
     // Create a Message in the DB
     const messageContent1 = {
@@ -164,7 +164,7 @@ describe('Messages DB Tests', function() {
       accountId:accountId,
       message:"Hey! Test Message",
     }
-    const initialMessageId = await createMessage(messageContent1)
+    const initialMessageId = await storeMessage(messageContent1)
 
     // Check Message was inserted correctly into DB
     const initialMessageThread = await getMessagesInThread(threadId1)
@@ -181,7 +181,7 @@ describe('Messages DB Tests', function() {
       accountId:accountId,
       message:"No Reply :(",
     }
-    const replyMessageId = await createMessage(messageContent2)
+    const replyMessageId = await storeMessage(messageContent2)
     const messageThread = await getMessagesInThread(threadId1)
     expect(messageThread.length).to.equal(2)
   })
@@ -203,7 +203,7 @@ describe('Feedback DB Tests', function() {
         }
 
         // Verify correct info for Feedback with no Account
-        const feedbackNoAccountId = await generateFeedback(feedbackNoAccountContent)
+        const feedbackNoAccountId = await storeFeedback(feedbackNoAccountContent)
         const feedbackNoAccount = await getFeedback(feedbackNoAccountId)
         expect(feedbackNoAccount.id).to.equal(feedbackNoAccountId)
         expect(feedbackNoAccount.message).to.equal(feedbackNoAccountContent.message)
@@ -221,7 +221,7 @@ describe('Feedback DB Tests', function() {
           org:'TEST',
           title:'TEST',
         }
-        const accountId = await createAccount(accountDetails)
+        const accountId = await storeAccount(accountDetails)
 
         // Create Feedback with Account
         const feedbackWithAccountContent = {
@@ -230,7 +230,7 @@ describe('Feedback DB Tests', function() {
         }
 
         // Verify correct info for Feedback with Account
-        const feedbackWithAccountId = await generateFeedback(feedbackWithAccountContent)
+        const feedbackWithAccountId = await storeFeedback(feedbackWithAccountContent)
         const feedbackWithAccount = await getFeedback(feedbackWithAccountId)
         expect(feedbackWithAccount.id).to.equal(feedbackWithAccountId)
         expect(feedbackWithAccount.message).to.equal(feedbackWithAccountContent.message)
@@ -252,7 +252,7 @@ describe('Invitiations DB Tests', function() {
           accountId:null,
           email:"test@test.com",
         }
-        const invtiationNoAccountId = await createInvitiation(invitationNoAccountContent)
+        const invtiationNoAccountId = await storeInvitation(invitationNoAccountContent)
         // Verify correct info for Invitation without Account
         const invitationNoAccount = await getInvitation(invtiationNoAccountId)
         expect(invitationNoAccount.id).to.equal(invtiationNoAccountId)
@@ -271,14 +271,14 @@ describe('Invitiations DB Tests', function() {
           org:'TEST',
           title:'TEST',
         }
-        const accountId = await createAccount(accountDetails)
+        const accountId = await storeAccount(accountDetails)
 
         // Create Invitation with Account
         const invitationWithAccountContent = {
           accountId:accountId,
           email:"test@test.com",
         }
-        const invtiationWithAccountId = await createInvitiation(invitationWithAccountContent)
+        const invtiationWithAccountId = await storeInvitation(invitationWithAccountContent)
 
         // Verify correct info for Invitation with Account
         const invitationWithAccount = await getInvitation(invtiationWithAccountId)

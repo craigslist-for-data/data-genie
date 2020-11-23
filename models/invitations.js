@@ -1,7 +1,7 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function createInvitiation(info) {
+async function storeInvitation(info) {
   try{
     const { accountId, email } = info
     query = `INSERT INTO invitations
@@ -25,6 +25,6 @@ async function getInvitation(id) {
 }
 
 module.exports = {
-  createInvitiation,
+  storeInvitation,
   getInvitation,
 }

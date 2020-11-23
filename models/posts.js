@@ -1,7 +1,7 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function createPost(postContents) {
+async function storePost(postContents) {
   try{
     const { accountId, topic, usage, purpose, briefDesc, detailedDesc, links } = postContents
     query = `INSERT INTO posts
@@ -43,7 +43,7 @@ async function getPostsBatch(index, batchSize) {
 }
 
 module.exports = {
-  createPost,
+  storePost,
   getPost,
   getPostsBatch,
 }
