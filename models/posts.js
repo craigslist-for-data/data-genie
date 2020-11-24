@@ -1,4 +1,4 @@
-const { mainPgPool } = require('../dbs/pg_helpers')
+const { pool, submitTransaction } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
 async function storePost(postContents) {
@@ -15,7 +15,7 @@ async function storePost(postContents) {
               ${stringifyForPGInsert(detailedDesc)},
               ${stringifyForPGInsert(links)})
             RETURNING id`
-    const result = await mainPgPool.submitTransaction(query)
+    const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
     console.error(err.stack)
@@ -24,14 +24,14 @@ async function storePost(postContents) {
 }
 
 async function getPost(id) {
-  return mainPgPool.pool
+  return pool
           .query(`SELECT * FROM posts WHERE id = ${id}`)
           .then(res => res.rows[0])
           .catch(err => console.error(err.stack))
 }
 
 async function getPostsBatch(index, batchSize) {
-  return mainPgPool.pool
+  return pool
           .query(`
             SELECT * from (
               SELECT *, CAST(row_number() over (ORDER BY created_at desc) as int) as row FROM posts

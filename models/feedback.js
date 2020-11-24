@@ -1,4 +1,4 @@
-const { mainPgPool } = require('../dbs/pg_helpers')
+const { pool, submitTransaction } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
 async function storeFeedback(feedback) {
@@ -9,7 +9,7 @@ async function storeFeedback(feedback) {
               VALUES
                 (${accountId}, ${stringifyForPGInsert(message)})
               RETURNING id`
-    const result = await mainPgPool.submitTransaction(query)
+    const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
     console.error(err.stack)
@@ -18,7 +18,7 @@ async function storeFeedback(feedback) {
 }
 
 async function getFeedback(feedbackId) {
-  return mainPgPool.pool
+  return pool
           .query(`SELECT * FROM feedback WHERE id = ${feedbackId}`)
           .then(res => res.rows[0])
           .catch(err => console.error(err.stack))

@@ -5,17 +5,17 @@ const { storeMessageThread, storeMessage,  getMessagesInThread } = require('../m
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
-const { mainPgPool } = require('../dbs/pg_helpers')
+const { pool, submitTransaction } = require('../dbs/pg_helpers')
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
 describe('Clear DB Data', function() {
   it('Should clear test data', async function() {
-    await mainPgPool.submitTransaction('DELETE FROM feedback')
-    await mainPgPool.submitTransaction('DELETE FROM invitations')
-    await mainPgPool.submitTransaction('DELETE FROM messages')
-    await mainPgPool.submitTransaction('DELETE FROM message_threads')
-    await mainPgPool.submitTransaction('DELETE FROM posts')
-    await mainPgPool.submitTransaction('DELETE FROM accounts')
+    await submitTransaction('DELETE FROM feedback')
+    await submitTransaction('DELETE FROM invitations')
+    await submitTransaction('DELETE FROM messages')
+    await submitTransaction('DELETE FROM message_threads')
+    await submitTransaction('DELETE FROM posts')
+    await submitTransaction('DELETE FROM accounts')
   })
 })
 
@@ -31,7 +31,7 @@ describe('Accounts Models Tests', function() {
       username:'testAccount',
       name:'Test Account',
       email:'account@test.com',
-      phone:2123456780,
+      phone:'2123456780',
       linkedin:null,
       github:null,
       ssrn:null,
@@ -75,7 +75,7 @@ describe('Posts Models Tests', function() {
       username:'testPost',
       name:'Test Post',
       email:'post@test.com',
-      phone:2123456781,
+      phone:'2123456781',
       linkedin:null,
       github:null,
       ssrn:null,
@@ -136,7 +136,7 @@ describe('Messages DB Tests', function() {
 
     // Create & Check Message Threads in the DB
     const threadId1 = await storeMessageThread()
-    const maxThreadId = await mainPgPool.pool
+    const maxThreadId = await pool
                                 .query(`SELECT max(id) FROM message_threads`)
                                 .then(res => res.rows[0].max)
                                 .catch(err => console.error(err.stack))
@@ -149,7 +149,7 @@ describe('Messages DB Tests', function() {
       username:'testMessage',
       name:'Test Message',
       email:'message@test.com',
-      phone:2123456782,
+      phone:'2123456782',
       linkedin:null,
       github:null,
       ssrn:null,
@@ -214,7 +214,7 @@ describe('Feedback DB Tests', function() {
           username:'testFeedback',
           name:'Test Feedback',
           email:'feedback@test.com',
-          phone:2123456783,
+          phone:'2123456783',
           linkedin:null,
           github:null,
           ssrn:null,
@@ -264,7 +264,7 @@ describe('Invitiations DB Tests', function() {
           username:'testInvitation',
           name:'Test Invitation',
           email:'invitation@test.com',
-          phone:2123456784,
+          phone:'2123456784',
           linkedin:null,
           github:null,
           ssrn:null,
