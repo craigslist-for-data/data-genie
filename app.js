@@ -2,13 +2,15 @@ const express = require('express')
 const cors = require('cors')
 const index = require('./routes/index')
 const accounts = require('./routes/accounts')
+const feedback = require('./routes/feedback')
 const { runDatabaseMigrations } = require('./dbs/main_migrations')
 
 const app = express()
 app.use(cors())
 app.use(express.json())
-app.use('/index',index)
+app.use('/',index)
 app.use('/account',accounts)
+app.use('/feedback',feedback)
 
 const hostname = '0.0.0.0';
 const port = 8080;

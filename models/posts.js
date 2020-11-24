@@ -27,7 +27,10 @@ async function getPost(id) {
   return pool
           .query(`SELECT * FROM posts WHERE id = ${id}`)
           .then(res => res.rows[0])
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 async function getPostsBatch(index, batchSize) {
@@ -39,7 +42,10 @@ async function getPostsBatch(index, batchSize) {
             WHERE (row - 1)  / ${batchSize} >= ${index - 1} AND (row - 1)  / ${batchSize} < ${index}
             `)
           .then(res => res.rows)
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 module.exports = {

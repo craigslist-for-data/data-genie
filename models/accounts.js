@@ -29,14 +29,20 @@ async function getAccountInfo(accountId) {
   return pool
           .query(`SELECT * FROM accounts WHERE id = ${accountId}`)
           .then(res => res.rows[0])
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 async function getAccountId(username) {
   return pool
           .query(`SELECT id FROM accounts WHERE username = '${username}'`)
           .then(res => res.rows[0].id)
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 module.exports = {

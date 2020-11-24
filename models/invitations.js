@@ -21,7 +21,10 @@ async function getInvitation(id) {
   return pool
           .query(`SELECT * FROM invitations WHERE id = ${id}`)
           .then(res => res.rows[0])
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 module.exports = {

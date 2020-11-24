@@ -9,6 +9,7 @@ async function storeFeedback(feedback) {
               VALUES
                 (${accountId}, ${stringifyForPGInsert(message)})
               RETURNING id`
+    console.log(query)
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
@@ -21,7 +22,10 @@ async function getFeedback(feedbackId) {
   return pool
           .query(`SELECT * FROM feedback WHERE id = ${feedbackId}`)
           .then(res => res.rows[0])
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 module.exports = {

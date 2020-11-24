@@ -34,7 +34,10 @@ async function getMessagesInThread(threadId) {
   return pool
           .query(`SELECT * FROM messages WHERE thread_id = ${threadId}`)
           .then(res => res.rows)
-          .catch(err => console.error(err.stack))
+          .catch(err => {
+            console.error(err.stack)
+            throw new Error(err)
+          })
 }
 
 module.exports = {
