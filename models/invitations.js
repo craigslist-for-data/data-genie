@@ -1,4 +1,4 @@
-const { mainPgPool } = require('../dbs/pg_helpers')
+const { pool, submitTransaction } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
 async function storeInvitation(info) {
@@ -9,7 +9,7 @@ async function storeInvitation(info) {
               VALUES
                 (${accountId}, '${email}')
               RETURNING id`
-    const result = await mainPgPool.submitTransaction(query)
+    const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
     console.error(err.stack)
@@ -18,7 +18,7 @@ async function storeInvitation(info) {
 }
 
 async function getInvitation(id) {
-  return mainPgPool.pool
+  return pool
           .query(`SELECT * FROM invitations WHERE id = ${id}`)
           .then(res => res.rows[0])
           .catch(err => console.error(err.stack))

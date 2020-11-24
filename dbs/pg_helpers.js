@@ -1,6 +1,6 @@
 const { Pool } = require('pg')
 
-const mainDB = {
+const db = {
   user: 'mcinali',
   host: 'localhost',
   database: 'data_genie',
@@ -8,39 +8,24 @@ const mainDB = {
   port: 5432,
 }
 
-const authDB = {
-  user: 'mcinali',
-  host: 'localhost',
-  database: 'data_genie_auth',
-  password: null,
-  port: 5432,
-}
+const pool = new Pool(db)
 
-class PostgresPool {
-  constructor(db) {
-    this.pool = new Pool(db)
-  }
-
-  async submitTransaction(text, values = []) {
-    const client = await this.pool.connect()
-    try {
-      await client.query('BEGIN')
-      const result = await client.query(text, values)
-      await client.query('COMMIT')
-      return result
-    } catch (err) {
-      await client.query('ROLLBACK')
-      console.error(err.stack)
-    } finally {
-      client.release()
-    }
+async function submitTransaction(text, values = []) {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const result = await client.query(text, values)
+    await client.query('COMMIT')
+    return result
+  } catch (err) {
+    await client.query('ROLLBACK')
+    console.error(err.stack)
+  } finally {
+    client.release()
   }
 }
-
-const authPgPool = new PostgresPool(authDB)
-const mainPgPool = new PostgresPool(mainDB)
 
 module.exports = {
-  authPgPool,
-  mainPgPool,
+  pool,
+  submitTransaction,
 }

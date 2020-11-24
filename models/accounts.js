@@ -1,4 +1,4 @@
-const { mainPgPool } = require('../dbs/pg_helpers')
+const { pool, submitTransaction } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
 async function storeAccount(accountDetails) {
@@ -17,7 +17,7 @@ async function storeAccount(accountDetails) {
                 ${stringifyForPGInsert(org)},
                 ${stringifyForPGInsert(title)})
               RETURNING id`
-    const result = await mainPgPool.submitTransaction(query)
+    const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
     console.error(err)
@@ -26,14 +26,14 @@ async function storeAccount(accountDetails) {
 }
 
 async function getAccountInfo(accountId) {
-  return mainPgPool.pool
+  return pool
           .query(`SELECT * FROM accounts WHERE id = ${accountId}`)
           .then(res => res.rows[0])
           .catch(err => console.error(err.stack))
 }
 
 async function getAccountId(username) {
-  return mainPgPool.pool
+  return pool
           .query(`SELECT id FROM accounts WHERE username = '${username}'`)
           .then(res => res.rows[0].id)
           .catch(err => console.error(err.stack))
