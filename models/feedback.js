@@ -1,7 +1,7 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function generateFeedback(feedback) {
+async function storeFeedback(feedback) {
   try{
     const { accountId, message } = feedback
     query = `INSERT INTO feedback
@@ -25,6 +25,6 @@ async function getFeedback(feedbackId) {
 }
 
 module.exports = {
-  generateFeedback,
+  storeFeedback,
   getFeedback,
 }

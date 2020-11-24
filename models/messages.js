@@ -1,7 +1,7 @@
 const { mainPgPool } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function createMessageThread() {
+async function storeMessageThread() {
   try {
     query = `INSERT INTO message_threads DEFAULT VALUES RETURNING id`
     const result = await mainPgPool.submitTransaction(query)
@@ -12,7 +12,7 @@ async function createMessageThread() {
   }
 }
 
-async function createMessage(messageContents) {
+async function storeMessage(messageContents) {
   try {
     const { threadId, accountId, message } = messageContents
     query = `INSERT INTO messages
@@ -38,7 +38,7 @@ async function getMessagesInThread(threadId) {
 }
 
 module.exports = {
-  createMessageThread,
-  createMessage,
+  storeMessageThread,
+  storeMessage,
   getMessagesInThread,
 }
