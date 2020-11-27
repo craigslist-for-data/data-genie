@@ -1,7 +1,7 @@
 const should = require('chai').should()
 const expect = require('chai').expect
 const { storeAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
-const { storeMessageThread, storeMessage,  getMessagesInThread } = require('../models/messages')
+const { storeMessageThread, storeMessageThreadUser, getAccountThreads, getThreadUsers, storeMessage, getMessagesInThread } = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
@@ -13,6 +13,7 @@ describe('Clear DB Data', function() {
     await submitTransaction('DELETE FROM feedback')
     await submitTransaction('DELETE FROM invitations')
     await submitTransaction('DELETE FROM messages')
+    await submitTransaction('DELETE FROM message_thread_users')
     await submitTransaction('DELETE FROM message_threads')
     await submitTransaction('DELETE FROM posts')
     await submitTransaction('DELETE FROM accounts')
@@ -129,7 +130,8 @@ describe('Posts Models Tests', function() {
 describe('Messages DB Tests', function() {
   it(`Should...
       - Create & Check Message Threads in the DB
-      - Create new Account for testing
+      - Create new Accounts for testing
+      - Create & Check Message Thread Users in the DB
       - Create a Message in the DB
       - Check Message was inserted correctly into DB
       - Insert additional message and ensure it was added to the thread`, async function() {
@@ -140,50 +142,88 @@ describe('Messages DB Tests', function() {
                                 .query(`SELECT max(id) FROM message_threads`)
                                 .then(res => res.rows[0].max)
                                 .catch(err => console.error(err.stack))
-    const threadId2 = await storeMessageThread()
     expect(threadId1).to.equal(maxThreadId)
+
+    const threadId2 = await storeMessageThread()
     expect(threadId2).to.be.above(maxThreadId)
 
-    // Create new Account for testing
-    const accountDetails = {
-      username:'testMessage',
-      name:'Test Message',
-      email:'message@test.com',
-      phone:'2123456782',
+    // Create new Accounts for testing
+    const accountDetails1 = {
+      username:'testMessage1',
+      name:'Test Message1',
+      email:'message1@test.com',
+      phone:'9173456781',
       linkedin:null,
       github:null,
       ssrn:null,
       org:'TEST',
       title:'TEST',
     }
-    const accountId = await storeAccount(accountDetails)
+    const accountDetails2 = {
+      username:'testMessage2',
+      name:'Test Message2',
+      email:'message2@test.com',
+      phone:'9173456782',
+      linkedin:null,
+      github:null,
+      ssrn:null,
+      org:'TEST',
+      title:'TEST',
+    }
+    const accountId1 = await storeAccount(accountDetails1)
+    const accountId2 = await storeAccount(accountDetails2)
+
+    // Create & Check Message Thread Users in the DB
+    const messageThread1UserId1 = await storeMessageThreadUser(threadId1, accountId1)
+    const messageThread1UserId2 = await storeMessageThreadUser(threadId1, accountId2)
+
+    function getAccountElement(row) {
+      return row['account_id']
+    }
+    const threadUserRows = await getThreadUsers(threadId1)
+    const threadUsers = threadUserRows.map(getAccountElement)
+    threadUsers.should.contain(accountId1)
+    threadUsers.should.contain(accountId2)
+    expect(threadUsers.length).to.equal(2)
+
+    const account1Threads = await getAccountThreads(accountId1)
+    const account2Threads = await getAccountThreads(accountId2)
+    expect(account1Threads[0].thread_id).to.equal(threadId1)
+    expect(account2Threads[0].thread_id).to.equal(threadId1)
+
 
     // Create a Message in the DB
     const messageContent1 = {
       threadId:threadId1,
-      accountId:accountId,
+      accountId:accountId1,
       message:"Hey! Test Message",
     }
     const initialMessageId = await storeMessage(messageContent1)
 
     // Check Message was inserted correctly into DB
     const initialMessageThread = await getMessagesInThread(threadId1)
-    const message = initialMessageThread[0]
-    expect(message.id).to.equal(initialMessageId)
-    expect(message.thread_id).to.equal(messageContent1.threadId)
-    expect(message.account_id).to.equal(messageContent1.accountId)
-    expect(message.message).to.equal(messageContent1.message)
+    const initialMessage = initialMessageThread[0]
+    expect(initialMessage.id).to.equal(initialMessageId)
+    expect(initialMessage.thread_id).to.equal(messageContent1.threadId)
+    expect(initialMessage.account_id).to.equal(messageContent1.accountId)
+    expect(initialMessage.message).to.equal(messageContent1.message)
     expect(initialMessageThread.length).to.equal(1)
 
     // Insert additional message and ensure it was added to the thread
     const messageContent2 = {
       threadId:threadId1,
-      accountId:accountId,
-      message:"No Reply :(",
+      accountId:accountId2,
+      message:"Reply!",
     }
     const replyMessageId = await storeMessage(messageContent2)
-    const messageThread = await getMessagesInThread(threadId1)
-    expect(messageThread.length).to.equal(2)
+    const replyMessageThread = await getMessagesInThread(threadId1)
+    expect(replyMessageThread.length).to.equal(2)
+    const replyMessage = replyMessageThread[1]
+    expect(replyMessage.id).to.equal(replyMessageId)
+    expect(replyMessage.thread_id).to.equal(messageContent2.threadId)
+    expect(replyMessage.account_id).to.equal(messageContent2.accountId)
+    expect(replyMessage.message).to.equal(messageContent2.message)
+    expect(initialMessageThread.length).to.equal(1)
   })
 })
 

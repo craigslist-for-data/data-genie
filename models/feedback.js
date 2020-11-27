@@ -9,7 +9,6 @@ async function storeFeedback(feedback) {
               VALUES
                 (${accountId}, ${stringifyForPGInsert(message)})
               RETURNING id`
-    console.log(query)
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
