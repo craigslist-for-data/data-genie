@@ -8,7 +8,7 @@ async function storeMessageThread() {
     return result.rows[0].id
   } catch(error) {
     console.error(error.stack)
-    return null
+    throw new Error(err)
   }
 }
 
@@ -26,7 +26,7 @@ async function storeMessage(messageContents) {
     return result.rows[0].id
   } catch (err) {
     console.error(err)
-    return null
+    throw new Error(err)
   }
 }
 

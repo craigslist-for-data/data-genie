@@ -7,13 +7,13 @@ async function storeInvitation(info) {
     query = `INSERT INTO invitations
                 (account_id, email)
               VALUES
-                (${accountId}, '${email}')
+                (${stringifyForPGInsert(accountId)}, '${email}')
               RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
     console.error(err.stack)
-    return null
+    throw new Error(err)
   }
 }
 

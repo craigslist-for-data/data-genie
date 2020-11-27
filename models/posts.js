@@ -19,7 +19,7 @@ async function storePost(postContents) {
     return result.rows[0].id
   } catch (err) {
     console.error(err.stack)
-    return null
+    throw new Error(err)
   }
 }
 
