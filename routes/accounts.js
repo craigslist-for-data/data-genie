@@ -17,7 +17,6 @@ router.post('/', async function (req, res) {
 router.get('/:id', async function (req, res) {
   try {
     const accountDetails = await getAccountDetails(req.params.id)
-    console.log(accountDetails)
     return res.send(accountDetails)
   } catch (err) {
     throw new Error(err)
