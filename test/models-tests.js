@@ -1,7 +1,7 @@
 const should = require('chai').should()
 const expect = require('chai').expect
 const { storeAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
-const { storeMessageThread, storeMessageThreadUser, getAccountThreads, getThreadUsers, storeMessage, getMessagesInThread } = require('../models/messages')
+const { storeMessageThread, storeMessageThreadUser, getAccountThreads, getThreads, storeMessage, getMessagesInThread } = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
@@ -180,7 +180,7 @@ describe('Messages DB Tests', function() {
     function getAccountElement(row) {
       return row['account_id']
     }
-    const threadUserRows = await getThreadUsers(threadId1)
+    const threadUserRows = await getThreads(threadId1)
     const threadUsers = threadUserRows.map(getAccountElement)
     threadUsers.should.contain(accountId1)
     threadUsers.should.contain(accountId2)

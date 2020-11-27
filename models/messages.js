@@ -23,7 +23,7 @@ async function storeMessageThreadUser(threadId, accountId) {
   }
 }
 
-async function getThreadUsers(threadId) {
+async function getThreads(threadId) {
   return pool
           .query(`SELECT account_id FROM message_thread_users WHERE thread_id = ${threadId}`)
           .then(res => res.rows)
@@ -75,7 +75,7 @@ module.exports = {
   storeMessageThread,
   storeMessageThreadUser,
   getAccountThreads,
-  getThreadUsers,
+  getThreads,
   storeMessage,
   getMessagesInThread,
 }
