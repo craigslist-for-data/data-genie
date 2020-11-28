@@ -1,10 +1,10 @@
-const { storeMessageThread, storeMessageThreadUser, getThreads, getThreadAccounts, storeMessage, getMessagesInThread } = require('../models/messages')
+const { storeMessageThread, storeMessageThreadUser, getThreads, getAccounts, storeMessage, getMessagesInThread } = require('../models/messages')
 
 // Create message thread
 async function createThread(users) {
   try {
     // Check if threadId exists
-    const threadId = storeMessageThread()
+    const threadId = await storeMessageThread()
     const threadUsers =  users.map(function(x) {return storeMessageThreadUser(threadId, x.accountId)})
     return {"threadId":threadId,
             "users":threadUsers}
@@ -26,10 +26,10 @@ async function getMessageThreads(accountId) {
 }
 
 // Send Message
-async function sendMessage(threadId, message){
+async function sendMessage(message){
   try {
     const messageId = storeMessage(message)
-    const accounts = getThreadAccounts(threadId)
+    const accounts = getAccounts(message.threadId)
     // TO DO: Send email with message to all accounts
     return messageId
   } catch (err) {

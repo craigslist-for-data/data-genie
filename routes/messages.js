@@ -3,7 +3,7 @@ const router = express.Router()
 const { createThread, getMessageThreads, sendMessage, getMessages } = require('../services/messages')
 
 // Create new thread
-router.post('/threads/', async function (req, res) {
+router.post('/threads', async function (req, res) {
   try {
     const id = await createThread(req.body.users)
     return res.send(`New Thread created ${id}"`)
@@ -25,9 +25,9 @@ router.get('/threads/:accountId', async function (req, res) {
 })
 
 // Create new message
-router.post('/:threadId', async function (req, res) {
+router.post('/', async function (req, res) {
   try {
-    const id = await sendMessage(req.params.threadId, req.body)
+    const id = await sendMessage(req.body)
     return res.send(`Message ${id} created!`)
   } catch (err) {
     throw new Error(err)

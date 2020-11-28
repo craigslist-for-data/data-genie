@@ -4,17 +4,17 @@ const { stringifyForPGInsert } = require('../utilities')
 async function storePost(postContents) {
   try{
     const { accountId, topic, usage, purpose, briefDesc, detailedDesc, links } = postContents
-    query = `INSERT INTO posts
-              (account_id, topic, usage, purpose, brief_description, detailed_description, links)
-            VALUES
-              (${accountId},
-              ${stringifyForPGInsert(topic)},
-              '${usage}',
-              ${stringifyForPGInsert(purpose)},
-              ${stringifyForPGInsert(briefDesc)},
-              ${stringifyForPGInsert(detailedDesc)},
-              ${stringifyForPGInsert(links)})
-            RETURNING id`
+    const query = `INSERT INTO posts
+                    (account_id, topic, usage, purpose, brief_description, detailed_description, links)
+                  VALUES
+                    (${accountId},
+                    ${stringifyForPGInsert(topic)},
+                    '${usage}',
+                    ${stringifyForPGInsert(purpose)},
+                    ${stringifyForPGInsert(briefDesc)},
+                    ${stringifyForPGInsert(detailedDesc)},
+                    ${stringifyForPGInsert(links)})
+                  RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
@@ -24,8 +24,9 @@ async function storePost(postContents) {
 }
 
 async function getPost(id) {
+  const query = `SELECT * FROM posts WHERE id = ${id}`
   return pool
-          .query(`SELECT * FROM posts WHERE id = ${id}`)
+          .query(query)
           .then(res => res.rows[0])
           .catch(err => {
             console.error(err.stack)
@@ -34,13 +35,11 @@ async function getPost(id) {
 }
 
 async function getPostsBatch(index, batchSize) {
+  const query = `SELECT * FROM
+                  (SELECT *, CAST(row_number() over (ORDER BY created_at desc) as int) as row FROM posts) as tt
+                WHERE (row - 1)  / ${batchSize} >= ${index - 1} AND (row - 1)  / ${batchSize} < ${index}`
   return pool
-          .query(`
-            SELECT * from (
-              SELECT *, CAST(row_number() over (ORDER BY created_at desc) as int) as row FROM posts
-            ) as tt
-            WHERE (row - 1)  / ${batchSize} >= ${index - 1} AND (row - 1)  / ${batchSize} < ${index}
-            `)
+          .query(query)
           .then(res => res.rows)
           .catch(err => {
             console.error(err.stack)

@@ -4,6 +4,7 @@ const index = require('./routes/index')
 const accounts = require('./routes/accounts')
 const feedback = require('./routes/feedback')
 const posts = require('./routes/posts')
+const messages = require('./routes/messages')
 const invitations = require('./routes/invitations')
 const { runDatabaseMigrations } = require('./dbs/main_migrations')
 
@@ -14,6 +15,7 @@ app.use('/',index)
 app.use('/account',accounts)
 app.use('/feedback',feedback)
 app.use('/posts',posts)
+app.use('/messages',messages)
 app.use('/invite',invitations)
 
 const hostname = '0.0.0.0';
