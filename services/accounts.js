@@ -1,5 +1,5 @@
 const { storeAccount, getAccountInfo } = require('../models/accounts')
-const {sendEmail} = require('./models/emails.js')
+const {sendEmail} = require('../models/emails.js')
 
 async function createAccount(info) {
   try {
@@ -9,7 +9,7 @@ async function createAccount(info) {
       to: info.email,
       from: 'craigslistfordata@gmail.com',
       subject: 'Welcome to Data Genie!',
-      text: `Welcome to Data Genie! We're the craisglist for data`,
+      text: `Welcome to Data Genie! We're like the craigslist for data but better`,
       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
     }
     sendEmail(msg)

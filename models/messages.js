@@ -23,7 +23,7 @@ async function storeMessageThreadUser(threadId, accountId) {
   }
 }
 
-async function getThreads(threadId) {
+async function getAccounts(threadId) {
   const query = `SELECT account_id FROM message_thread_users WHERE thread_id = ${threadId}`
   return pool
           .query(query)
@@ -34,7 +34,7 @@ async function getThreads(threadId) {
           })
 }
 
-async function getAccounts(accountId) {
+async function getThreads(accountId) {
   const query = `SELECT thread_id FROM message_thread_users WHERE account_id = ${accountId}`
   return pool
           .query(query)

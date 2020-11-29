@@ -1,5 +1,5 @@
 const { storeInvitation} = require('../models/invitations')
-const {sendEmail} = require('./models/emails.js')
+const {sendEmail} = require('../models/emails.js')
 
 async function sendInvitation(info) {
   try {
@@ -8,7 +8,7 @@ async function sendInvitation(info) {
       to: info.email,
       from: 'craigslistfordata@gmail.com',
       subject: `You're Invited to Data Genie!`,
-      text: 'Your friend invited you to use Data Genie',
+      text: `Your friend invited you to use Data Genie! It's like the craigslist for data but better.`,
       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
     }
     sendEmail(msg)

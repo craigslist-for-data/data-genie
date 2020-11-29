@@ -180,14 +180,14 @@ describe('Messages DB Tests', function() {
     function getAccountElement(row) {
       return row['account_id']
     }
-    const threadUserRows = await getThreads(threadId1)
+    const threadUserRows = await getAccounts(threadId1)
     const threadUsers = threadUserRows.map(getAccountElement)
     threadUsers.should.contain(accountId1)
     threadUsers.should.contain(accountId2)
     expect(threadUsers.length).to.equal(2)
 
-    const account1Threads = await getAccounts(accountId1)
-    const account2Threads = await getAccounts(accountId2)
+    const account1Threads = await getThreads(accountId1)
+    const account2Threads = await getThreads(accountId2)
     expect(account1Threads[0].thread_id).to.equal(threadId1)
     expect(account2Threads[0].thread_id).to.equal(threadId1)
 
