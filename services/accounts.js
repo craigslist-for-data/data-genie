@@ -1,9 +1,20 @@
-const { storeAccount, getAccountInfo } = require('../models/accounts')
+const { storeAccount, getAccountInfo, getAccountId } = require('../models/accounts')
 const {sendEmail} = require('../models/emails.js')
+const { storeLoginCredentials, storeAccessToken, getLoginId } = require('../models/auth')
+const { hashPassword } = require('../utilities')
+const jwt = require('jsonwebtoken')
 
 async function createAccount(info) {
   try {
     // TO DO: Create account in auth
+    const hashedPassword = hashPassword(info.password)
+    const loginId = await storeLoginCredentials({username: info.username,
+                                                password: hashedPassword})
+    const token = jwt.sign({ id: loginId }, hashedPassword)
+    const expiration = new Date(Date.now() + 1800000).toISOString()
+    const accessTokenId = storeAccessToken({loginId:loginId,
+                                            token:token,
+                                            expiration:expiration})
 
     const msg = {
       to: info.email,
@@ -15,11 +26,33 @@ async function createAccount(info) {
     sendEmail(msg)
 
     // Create new account in DB
-    const accountId = storeAccount(info)
-    return accountId
+    const accountId = await storeAccount(info)
+    return {
+      accountId: accountId,
+      username: info.username,
+      auth: true,
+      token: token,
+    }
   } catch (err) {
     console.error(err)
     throw new Error(err)
+  }
+}
+
+async function loginAccount(credentials){
+  const loginId = await getLoginId(credentials.username)
+  const hashedPassword = hashPassword(credentials.password)
+  const token = jwt.sign({ id: loginId }, hashedPassword)
+  const expiration = new Date(Date.now() + 1800000).toISOString()
+  const accessTokenId = storeAccessToken({loginId:loginId,
+                                          token:token,
+                                          expiration:expiration})
+  const accountId = await getAccountId(credentials.username)
+  return {
+    accountId:accountId,
+    username:credentials.username,
+    auth: true,
+    token: token,
   }
 }
 
@@ -35,5 +68,6 @@ async function getAccountDetails(id){
 
 module.exports = {
   createAccount,
+  loginAccount,
   getAccountDetails,
 }
