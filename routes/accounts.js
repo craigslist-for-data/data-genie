@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { createAccount, loginAccount, getAccountDetails } = require('../services/accounts')
+const { verifyLoginCredentials, authorizeAccessToken } = require('../middleware/auth')
 
 // Create new Account
 router.post('/register', async function (req, res) {
@@ -14,7 +15,7 @@ router.post('/register', async function (req, res) {
 })
 
 // Login
-router.post('/login', async function (req, res) {
+router.post('/login', verifyLoginCredentials, async function (req, res) {
   try {
     const results = await loginAccount(req.body)
     return res.send(results)
@@ -25,7 +26,7 @@ router.post('/login', async function (req, res) {
 })
 
 // Get Account info
-router.get('/:id', async function (req, res) {
+router.get('/:id', authorizeAccessToken, async function (req, res) {
   try {
     const accountDetails = await getAccountDetails(req.params.id)
     return res.send(accountDetails)

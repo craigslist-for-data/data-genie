@@ -10,9 +10,9 @@ const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
 const { storeLoginCredentials,
-        verifyPassword,
-        storeAccessToken,
+        getPassword,
         getLoginId,
+        storeAccessToken,
         verifyAccessToken } = require('../models/auth')
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
 
@@ -346,6 +346,7 @@ describe('Auth Models Tests', function() {
       - Create new access tokens
       - Verify access token
       - Verify expired access token`, async function() {
+
         // Create new login credentials
         const loginInfo = {
           username:'AuthTest',
@@ -353,20 +354,10 @@ describe('Auth Models Tests', function() {
         }
         const loginId = await storeLoginCredentials(loginInfo)
         // Verify login credentials
-        const loginTrue = await verifyPassword(loginInfo)
-        expect(loginTrue).to.equal(true)
+        const password = await getPassword(loginInfo.username)
+        expect(password.password).to.equal(loginInfo.password)
         const loginIdCheck = await getLoginId(loginInfo.username)
-        expect(loginId).to.equal(loginIdCheck)
-
-        const badLoginInfo = {
-          username:'AuthTestBad',
-          password:'wrongpassword'
-        }
-        try {
-            const loginFalse = await verifyPassword(badLoginInfo)
-        } catch (err) {
-          expect(err.message).to.equal(`TypeError: Cannot read property 'verified' of undefined`)
-        }
+        expect(loginId).to.equal(loginIdCheck.id)
 
         //  Create new access tokens
         const futureTS = new Date(Date.now() + 10000).toISOString()
@@ -378,12 +369,8 @@ describe('Auth Models Tests', function() {
         const validTokenId = await storeAccessToken(validAccessToken)
 
         // Verify access token
-        const validateAccessToken = {
-          login_id:loginId,
-          token: validAccessToken.token,
-        }
-        const verifiedAccessToken = await verifyAccessToken(validateAccessToken)
-        expect(verifiedAccessToken).to.equal(true)
+        const verifiedAccessToken = await verifyAccessToken(validAccessToken)
+        expect(verifiedAccessToken.verified).to.equal(true)
 
         // Verify expired access token
         const expiredTS = new Date(Date.now()).toISOString()
@@ -393,14 +380,7 @@ describe('Auth Models Tests', function() {
           expiration:expiredTS,
         }
         const invalidTokenId = await storeAccessToken(invalidAccessToken)
-        const invalidateAccessToken = {
-          login_id:invalidTokenId,
-          token: invalidAccessToken.token,
-        }
-        try {
-            const invalidatedAccessToken = await verifyAccessToken(invalidateAccessToken)
-        } catch (err) {
-          expect(err.message).to.equal(`TypeError: Cannot read property 'verified' of undefined`)
-        }
+        const invalidatedAccessToken = await verifyAccessToken(invalidAccessToken)
+        should.not.exist(invalidatedAccessToken)
       })
     })

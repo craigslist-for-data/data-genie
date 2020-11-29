@@ -1,6 +1,6 @@
 const { storeAccount, getAccountInfo, getAccountId } = require('../models/accounts')
 const {sendEmail} = require('../models/emails.js')
-const { storeLoginCredentials, storeAccessToken, getLoginId } = require('../models/auth')
+const { storeLoginCredentials, storeAccessToken } = require('../models/auth')
 const { hashPassword } = require('../utilities')
 const jwt = require('jsonwebtoken')
 
@@ -40,7 +40,7 @@ async function createAccount(info) {
 }
 
 async function loginAccount(credentials){
-  const loginId = await getLoginId(credentials.username)
+  const loginId = await getAccountId(credentials.username)
   const hashedPassword = hashPassword(credentials.password)
   const token = jwt.sign({ id: loginId }, hashedPassword)
   const expiration = new Date(Date.now() + 1800000).toISOString()
