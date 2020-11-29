@@ -1,4 +1,12 @@
-const { storeMessageThread, storeMessageThreadUser, getThreads, getAccounts, storeMessage, getMessagesInThread } = require('../models/messages')
+const { storeMessageThread,
+        storeMessageThreadUser,
+        getThreads,
+        getAccounts,
+        storeMessage,
+        getMessagesInThread
+      } = require('../models/messages')
+const { getAccountInfo } = require('../models/accounts')
+const {sendEmail} = require('../models/emails.js')
 
 // Create message thread
 async function createThread(users) {
@@ -29,8 +37,19 @@ async function getMessageThreads(accountId) {
 async function sendMessage(message){
   try {
     const messageId = storeMessage(message)
-    const accounts = getAccounts(message.threadId)
+    const threadAccounts = await getAccounts(message.threadId)
+    const sendAccounts = threadAccounts.filter(x => x.account_id !== message.accountId)
+    const accountsDetails = await Promise.all(sendAccounts.map(x => getAccountInfo(x.account_id)))
     // TO DO: Send email with message to all accounts
+    const msgs = accountsDetails.map(x => msg = {
+                                      to: x.email,
+                                      from: 'craigslistfordata@gmail.com',
+                                      subject: `New Data Genie Message!`,
+                                      text: message.message,
+                                      // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+                                    })
+    console.log(msgs)
+    msgs.map(x => sendEmail(x))
     return messageId
   } catch (err) {
     console.error(err)
