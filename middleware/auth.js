@@ -21,19 +21,14 @@ async function authorizeLoginCredentials(req, res, next) {
 }
 
 
-async function authorizeAccountsAccessToken(req, res, next) {
+async function authorizeAccessToken(req, res, next){
   try {
     const token = req.header('token')
     const loginInfo = await getAccessTokenLoginInfo(token)
     if (!Boolean(loginInfo)){
-      res.status(401).send('Invalid access token')
+      res.status(401).send(`Invalid access token`)
     } else {
-        const accountId = await getAccountId(loginInfo.username)
-        if (accountId==req.params.accountId){
-          next()
-        } else {
-          res.status(401).send(`Invalid access token for account: ${req.params.accountId}`)
-        }
+      next()
     }
   } catch (err) {
     console.error(err)
@@ -41,8 +36,28 @@ async function authorizeAccountsAccessToken(req, res, next) {
   }
 }
 
+// async function authorizeAccessTokenForAccount(req, res, next){
+//   try {
+//     const token = req.header('token')
+//     const loginInfo = await getAccessTokenLoginInfo(token)
+//     if (!Boolean(loginInfo)){
+//       res.status(401).send(`Invalid access token`)
+//     } else {
+//         const accountId = await getAccountId(loginInfo.username)
+//         if (accountId==req.params.accountId){
+//           next()
+//         } else {
+//           res.status(401).send(`Invalid access token for account: ${req.params.accountId}`)
+//         }
+//     }
+//   } catch (err) {
+//     console.error(err)
+//     throw new Error('Unable to authorize access token')
+//   }
+// }
+
 
 module.exports = {
   authorizeLoginCredentials,
-  authorizeAccountsAccessToken,
+  authorizeAccessToken,
 }
