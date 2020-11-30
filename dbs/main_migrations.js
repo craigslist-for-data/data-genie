@@ -3,7 +3,9 @@ const { submitTransaction } = require('./pg_helpers');
 // CREATE TABLES in main DB
 
 async function runDatabaseMigrations() {
-  await submitTransaction(`CREATE TABLE IF NOT EXISTS passwords (
+  await submitTransaction(`ALTER DATABASE data_genie SET timezone TO 'GMT'`)
+
+  await submitTransaction(`CREATE TABLE IF NOT EXISTS logins (
                             id SERIAL PRIMARY KEY NOT NULL,
                             username VARCHAR(32) UNIQUE NOT NULL,
                             password BYTEA NOT NULL,
@@ -13,7 +15,7 @@ async function runDatabaseMigrations() {
 
    await submitTransaction(`CREATE TABLE IF NOT EXISTS access_tokens (
                             id SERIAL PRIMARY KEY NOT NULL,
-                            password_id INT NOT NULL REFERENCES passwords(id),
+                            login_id INT NOT NULL REFERENCES logins(id),
                             token BYTEA NOT NULL,
                             expiration TIMESTAMP NOT NULL,
                             created_at TIMESTAMP NOT NULL DEFAULT now()

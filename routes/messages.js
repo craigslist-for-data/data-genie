@@ -1,9 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const { createThread, getMessageThreads, sendMessage, getMessages } = require('../services/messages')
+const { getAccountIdFromAccessToken } = require('../services/auth')
+const { authorizeAccessToken } = require('../middleware/auth')
 
 // Create new thread
-router.post('/threads', async function (req, res) {
+router.post('/threads', authorizeAccessToken, async function (req, res) {
   try {
     const id = await createThread(req.body.users)
     return res.send(`New Thread created ${id}"`)
@@ -14,9 +16,10 @@ router.post('/threads', async function (req, res) {
 })
 
 // Get message threads for account
-router.get('/threads/:accountId', async function (req, res) {
+router.get('/threads/', authorizeAccessToken, async function (req, res) {
   try {
-    const threads = await getMessageThreads(req.params.accountId)
+    const accountId = await getAccountIdFromAccessToken(req.header('token'))
+    const threads = await getMessageThreads(accountId)
     return res.send(threads)
   } catch (err) {
     throw new Error(err)
@@ -25,7 +28,7 @@ router.get('/threads/:accountId', async function (req, res) {
 })
 
 // Create new message
-router.post('/', async function (req, res) {
+router.post('/', authorizeAccessToken, async function (req, res) {
   try {
     const id = await sendMessage(req.body)
     return res.send(`Message ${id} created!`)
@@ -35,9 +38,8 @@ router.post('/', async function (req, res) {
   }
 })
 
-
 // Get messages in thread
-router.get('/:threadId', async function (req, res) {
+router.get('/:threadId', authorizeAccessToken, async function (req, res) {
   try {
     const messages = await getMessages(req.params.threadId)
     return res.send(messages)

@@ -1,12 +1,24 @@
 const express = require('express')
 const router = express.Router()
-const { createAccount, getAccountDetails } = require('../services/accounts')
+const { createAccount, loginAccount, getAccountDetails } = require('../services/accounts')
+const { authorizeLoginCredentials, authorizeAccessToken } = require('../middleware/auth')
 
 // Create new Account
-router.post('/', async function (req, res) {
+router.post('/register', async function (req, res) {
   try {
-    const accountId = await createAccount(req.body)
-    return res.send(`New Account created for ${req.body.username}!`)
+    const results = await createAccount(req.body)
+    return res.send(results)
+  } catch (err) {
+    throw new Error(err)
+    return res.status(400).json({error: 'Failed to create new account'})
+  }
+})
+
+// Login
+router.post('/login', authorizeLoginCredentials, async function (req, res) {
+  try {
+    const results = await loginAccount(req.body)
+    return res.send(results)
   } catch (err) {
     throw new Error(err)
     return res.status(400).json({error: 'Failed to create new account'})
@@ -14,9 +26,9 @@ router.post('/', async function (req, res) {
 })
 
 // Get Account info
-router.get('/:id', async function (req, res) {
+router.get('/:accountId', authorizeAccessToken, async function (req, res) {
   try {
-    const accountDetails = await getAccountDetails(req.params.id)
+    const accountDetails = await getAccountDetails(req.params.accountId)
     return res.send(accountDetails)
   } catch (err) {
     throw new Error(err)

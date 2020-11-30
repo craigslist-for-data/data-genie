@@ -1,9 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const { createPost, getBatchedPosts, getIndividualPost } = require('../services/posts')
+const { authorizeAccessToken } = require('../middleware/auth')
 
 // Create new post
-router.post('/', async function (req, res) {
+router.post('/', authorizeAccessToken, async function (req, res) {
   try {
     const id = await createPost(req.body)
     return res.send(`New Post created: "${req.body.topic}"`)
@@ -26,9 +27,9 @@ router.get('/', async function (req, res) {
 })
 
 // Get Post
-router.get('/:id', async function (req, res) {
+router.get('/:postId', async function (req, res) {
   try {
-    const postDetails = await getIndividualPost(req.params.id)
+    const postDetails = await getIndividualPost(req.params.postId)
     return res.send(postDetails)
   } catch (err) {
     throw new Error(err)

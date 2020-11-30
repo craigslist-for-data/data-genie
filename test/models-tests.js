@@ -1,10 +1,18 @@
 const should = require('chai').should()
 const expect = require('chai').expect
 const { storeAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
-const { storeMessageThread, storeMessageThreadUser, getAccounts, getThreads, storeMessage, getMessagesInThread } = require('../models/messages')
+const { storeMessageThread,
+        storeMessageThreadUser,
+        getAccounts, getThreads,
+        storeMessage,
+        getMessagesInThread } = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
+const { storeLoginCredentials,
+        getLoginInfo,
+        storeAccessToken,
+        getAccessTokenLoginInfo } = require('../models/auth')
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
@@ -17,6 +25,8 @@ describe('Clear DB Data', function() {
     await submitTransaction('DELETE FROM message_threads')
     await submitTransaction('DELETE FROM posts')
     await submitTransaction('DELETE FROM accounts')
+    await submitTransaction('DELETE FROM access_tokens')
+    await submitTransaction('DELETE FROM logins')
   })
 })
 
@@ -327,3 +337,48 @@ describe('Invitiations DB Tests', function() {
         expect(invitationWithAccount.email).to.equal(invitationWithAccountContent.email)
   })
 })
+
+describe('Auth Models Tests', function() {
+  it(`Should...
+      - Create new login credentials
+      - Verify login credentials
+      - Create new access tokens
+      - Verify access token
+      - Verify expired access token`, async function() {
+
+        // Create new login credentials
+        const loginInfo = {
+          username:'AuthTest',
+          password:'testpassword'
+        }
+        const loginId = await storeLoginCredentials(loginInfo)
+        // Verify login credentials
+        const dbLoginInfo = await getLoginInfo(loginInfo.username)
+        expect(dbLoginInfo.password).to.equal(loginInfo.password)
+
+        //  Create new access tokens
+        const futureTS = new Date(Date.now() + 10000).toISOString()
+        const validAccessToken = {
+          loginId:loginId,
+          token:"validtesttoken",
+          expiration:futureTS,
+        }
+        const validTokenId = await storeAccessToken(validAccessToken)
+
+        // Verify access token
+        const accessTokenLogin = await getAccessTokenLoginInfo(validAccessToken.token)
+        expect(accessTokenLogin.id).to.equal(loginId)
+        expect(accessTokenLogin.username).to.equal(loginInfo.username)
+
+        // Verify expired access token
+        const expiredTS = new Date(Date.now()).toISOString()
+        const invalidAccessToken = {
+          loginId:loginId,
+          token:"invalidtesttoken",
+          expiration:expiredTS,
+        }
+        const invalidTokenId = await storeAccessToken(invalidAccessToken)
+        const invalidatedAccessToken = await getAccessTokenLoginInfo(invalidAccessToken.token)
+        should.not.exist(invalidatedAccessToken)
+      })
+    })
