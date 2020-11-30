@@ -10,10 +10,9 @@ const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
 const { storeLoginCredentials,
-        getPassword,
-        getLoginId,
+        getLoginInfo,
         storeAccessToken,
-        verifyAccessToken } = require('../models/auth')
+        getAccessTokenLoginInfo } = require('../models/auth')
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
@@ -354,10 +353,8 @@ describe('Auth Models Tests', function() {
         }
         const loginId = await storeLoginCredentials(loginInfo)
         // Verify login credentials
-        const password = await getPassword(loginInfo.username)
-        expect(password.password).to.equal(loginInfo.password)
-        const loginIdCheck = await getLoginId(loginInfo.username)
-        expect(loginId).to.equal(loginIdCheck.id)
+        const dbLoginInfo = await getLoginInfo(loginInfo.username)
+        expect(dbLoginInfo.password).to.equal(loginInfo.password)
 
         //  Create new access tokens
         const futureTS = new Date(Date.now() + 10000).toISOString()
@@ -369,8 +366,9 @@ describe('Auth Models Tests', function() {
         const validTokenId = await storeAccessToken(validAccessToken)
 
         // Verify access token
-        const verifiedAccessToken = await verifyAccessToken(validAccessToken)
-        expect(verifiedAccessToken.verified).to.equal(true)
+        const accessTokenLogin = await getAccessTokenLoginInfo(validAccessToken.token)
+        expect(accessTokenLogin.id).to.equal(loginId)
+        expect(accessTokenLogin.username).to.equal(loginInfo.username)
 
         // Verify expired access token
         const expiredTS = new Date(Date.now()).toISOString()
@@ -380,7 +378,7 @@ describe('Auth Models Tests', function() {
           expiration:expiredTS,
         }
         const invalidTokenId = await storeAccessToken(invalidAccessToken)
-        const invalidatedAccessToken = await verifyAccessToken(invalidAccessToken)
+        const invalidatedAccessToken = await getAccessTokenLoginInfo(invalidAccessToken.token)
         should.not.exist(invalidatedAccessToken)
       })
     })

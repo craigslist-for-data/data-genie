@@ -1,14 +1,14 @@
-const { getPassword, verifyAccessToken, getLoginId } = require('../models/auth')
-const { getAccountInfo } = require('../models/accounts')
+const { getLoginInfo, getAccessTokenLoginInfo } = require('../models/auth')
+const { getAccountId, getAccountInfo } = require('../models/accounts')
 const { hashPassword } = require('../utilities')
 const bcrypt = require('bcrypt')
 
-async function verifyLoginCredentials(req, res, next) {
+async function authorizeLoginCredentials(req, res, next) {
   try {
     const password = req.body.password
     const username = req.body.username
-    const hashedPassword = await getPassword(username)
-    const verified = bcrypt.compareSync(password, hashedPassword.password)
+    const loginInfo = await getLoginInfo(username)
+    const verified = bcrypt.compareSync(password, loginInfo.password)
     if (verified) {
       next()
     } else {
@@ -20,28 +20,29 @@ async function verifyLoginCredentials(req, res, next) {
   }
 }
 
-async function authorizeAccessToken(req, res, next) {
+
+async function authorizeAccountsAccessToken(req, res, next) {
   try {
-    const accountId = req.params.id
-    const account = await getAccountInfo(accountId)
-    const username = account.username
-    const login = await getLoginId(username)
-    const loginId = login.id
     const token = req.header('token')
-    const verified = await verifyAccessToken({loginId:loginId,
-                                              token:token})
-    if (!Boolean(verified)) {
+    const loginInfo = await getAccessTokenLoginInfo(token)
+    if (!Boolean(loginInfo)){
       res.status(401).send('Invalid access token')
     } else {
-      next()
+        const accountId = await getAccountId(loginInfo.username)
+        if (accountId==req.params.accountId){
+          next()
+        } else {
+          res.status(401).send(`Invalid access token for account: ${req.params.accountId}`)
+        }
     }
   } catch (err) {
     console.error(err)
-    res.status(500).send('Unable to authorize access token')
+    throw new Error('Unable to authorize access token')
   }
 }
 
+
 module.exports = {
-  verifyLoginCredentials,
-  authorizeAccessToken,
+  authorizeLoginCredentials,
+  authorizeAccountsAccessToken,
 }

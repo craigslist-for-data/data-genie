@@ -26,9 +26,9 @@ router.get('/', async function (req, res) {
 })
 
 // Get Post
-router.get('/:id', async function (req, res) {
+router.get('/:postId', async function (req, res) {
   try {
-    const postDetails = await getIndividualPost(req.params.id)
+    const postDetails = await getIndividualPost(req.params.postId)
     return res.send(postDetails)
   } catch (err) {
     throw new Error(err)

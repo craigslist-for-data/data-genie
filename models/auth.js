@@ -14,19 +14,8 @@ async function storeLoginCredentials(credentials) {
   }
 }
 
-async function getPassword(username) {
-  const query = `SELECT encode(password,'escape') as password FROM logins WHERE username = '${username}'`
-  return pool
-          .query(query)
-          .then(res => res.rows[0])
-          .catch(err => {
-            console.error(err.stack)
-            throw new Error(err)
-          })
-}
-
-async function getLoginId(username) {
-  const query = `SELECT id from logins where username = '${username}'`
+async function getLoginInfo(username) {
+  const query = `SELECT id, encode(password,'escape') as password FROM logins WHERE username = '${username}'`
   return pool
           .query(query)
           .then(res => res.rows[0])
@@ -40,7 +29,7 @@ async function storeAccessToken(info) {
   try{
     const { loginId,  token, expiration} = info
     const query = `INSERT INTO access_tokens (login_id, token, expiration)
-                  VALUES ('${loginId}','${token}','${expiration}') RETURNING id`
+                  VALUES (${loginId},'${token}','${expiration}') RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
@@ -49,11 +38,10 @@ async function storeAccessToken(info) {
   }
 }
 
-async function verifyAccessToken(info) {
-  const { loginId, token } = info
-  const query = `SELECT true as verified
-                FROM access_tokens
-                WHERE encode(token,'escape') = '${token}' and login_id = ${loginId} and expiration >= now()`
+async function getAccessTokenLoginInfo(token) {
+  const query = `SELECT id, username FROM logins
+                WHERE id in (SELECT login_id FROM access_tokens
+                            WHERE encode(token,'escape') = '${token}' and expiration >= now())`
   return pool
           .query(query)
           .then(res => res.rows[0])
@@ -65,8 +53,7 @@ async function verifyAccessToken(info) {
 
 module.exports = {
   storeLoginCredentials,
-  getPassword,
-  getLoginId,
+  getLoginInfo,
   storeAccessToken,
-  verifyAccessToken,
+  getAccessTokenLoginInfo,
 }

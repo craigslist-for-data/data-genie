@@ -40,7 +40,7 @@ async function getAccountId(username) {
   const query = `SELECT id FROM accounts WHERE username = '${username}'`
   return pool
           .query(query)
-          .then(res => res.rows[0])
+          .then(res => res.rows[0].id)
           .catch(err => {
             console.error(err.stack)
             throw new Error(err)

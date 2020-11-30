@@ -14,27 +14,15 @@ router.post('/threads', async function (req, res) {
 })
 
 // Get message threads for account
-router.get('/threads/:accountId', async function (req, res) {
+router.get('/threads/', async function (req, res) {
   try {
-    const threads = await getMessageThreads(req.params.accountId)
+    const threads = await getMessageThreads(req.body.accountId)
     return res.send(threads)
   } catch (err) {
     throw new Error(err)
     return res.status(400).json({error: `Failed to get message threads for account ${accountId}`})
   }
 })
-
-// Create new message
-router.post('/', async function (req, res) {
-  try {
-    const id = await sendMessage(req.body)
-    return res.send(`Message ${id} created!`)
-  } catch (err) {
-    throw new Error(err)
-    return res.status(400).json({error: 'Failed to create new post'})
-  }
-})
-
 
 // Get messages in thread
 router.get('/:threadId', async function (req, res) {
@@ -44,6 +32,17 @@ router.get('/:threadId', async function (req, res) {
   } catch (err) {
     throw new Error(err)
     return res.status(400).json({error: 'Failed to fetch messages'})
+  }
+})
+
+// Create new message
+router.post('/:threadId', async function (req, res) {
+  try {
+    const id = await sendMessage(req.body)
+    return res.send(`Message ${id} created!`)
+  } catch (err) {
+    throw new Error(err)
+    return res.status(400).json({error: 'Failed to create new post'})
   }
 })
 
