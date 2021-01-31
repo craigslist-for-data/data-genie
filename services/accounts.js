@@ -1,6 +1,6 @@
 const { storeAccount, getAccountInfo, getAccountId } = require('../models/accounts')
 const {sendEmail} = require('../models/emails.js')
-const { storeLoginCredentials, storeAccessToken, getLoginInfo } = require('../models/auth')
+const { storeAccessToken } = require('../models/auth')
 const { hashPassword } = require('../utilities')
 const jwt = require('jsonwebtoken')
 
@@ -8,16 +8,16 @@ async function createAccount(info) {
   try {
     // TO DO: Create account in auth
     const hashedPassword = hashPassword(info.password)
-    const loginId = await storeLoginCredentials({username: info.username,
-                                                password: hashedPassword})
-    const token = jwt.sign({ id: loginId }, hashedPassword)
+    info['password'] = hashedPassword
+    // Create new account in DB
+    const accountId = await storeAccount(info)
+    // Store auth token
+    const token = jwt.sign({ id: accountId }, hashedPassword)
     const expiration = new Date(Date.now() + 1800000).toISOString()
-    const accessTokenId = storeAccessToken({loginId:loginId,
+    const accessTokenId = storeAccessToken({accountId:accountId,
                                             token:token,
                                             expiration:expiration})
 
-    // Create new account in DB
-    const accountId = await storeAccount(info)
     // Send registration email
     const msg = {
       to: info.email,
@@ -41,26 +41,36 @@ async function createAccount(info) {
 }
 
 async function loginAccount(credentials){
-  const login = await getLoginInfo(credentials.username)
   const hashedPassword = hashPassword(credentials.password)
-  const token = jwt.sign({ id: login.id }, hashedPassword)
+  const accountId = await getAccountId(credentials.username)
+  const token = jwt.sign({ id: accountId }, hashedPassword)
   const expiration = new Date(Date.now() + 1800000).toISOString()
-  const accessTokenId = storeAccessToken({loginId:login.id,
+  const accessTokenId = storeAccessToken({accountId:accountId,
                                           token:token,
                                           expiration:expiration})
-  const accountId = await getAccountId(credentials.username)
   return {
     accountId:accountId,
     username:credentials.username,
-    auth: true,
+    hasToken: true,
     token: token,
   }
 }
 
 async function getAccountDetails(id){
   try {
-    const accountDetails = getAccountInfo(id)
-    return accountDetails
+    const accountDetails = await getAccountInfo(id)
+    return {
+      accountId:accountDetails.id,
+      username:accountDetails.username,
+      name:accountDetails.name,
+      email:accountDetails.email,
+      phone:accountDetails.phone,
+      linkedin:accountDetails.linkedin,
+      github:accountDetails.github,
+      ssrn:accountDetails.ssrn,
+      org:accountDetails.org,
+      title:accountDetails.title,
+    }
   } catch (err) {
     console.error(err)
     throw new Error(err)
