@@ -16,6 +16,9 @@ async function createAccount(info) {
                                             token:token,
                                             expiration:expiration})
 
+    // Create new account in DB
+    const accountId = await storeAccount(info)
+    // Send registration email
     const msg = {
       to: info.email,
       from: 'craigslistfordata@gmail.com',
@@ -24,13 +27,11 @@ async function createAccount(info) {
       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
     }
     sendEmail(msg)
-
-    // Create new account in DB
-    const accountId = await storeAccount(info)
+    // Return response
     return {
       accountId: accountId,
       username: info.username,
-      auth: true,
+      hasToken: true,
       token: token,
     }
   } catch (err) {

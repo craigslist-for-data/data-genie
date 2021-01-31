@@ -17,6 +17,8 @@ async function storeAccount(accountDetails) {
                     ${stringifyForPGInsert(org)},
                     ${stringifyForPGInsert(title)})
                   RETURNING id`
+    console.log(accountDetails)
+    console.log(query)
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
