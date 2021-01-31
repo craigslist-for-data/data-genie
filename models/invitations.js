@@ -7,7 +7,7 @@ async function storeInvitation(info) {
     const query = `INSERT INTO invitations
                     (account_id, email)
                   VALUES
-                    (${stringifyForPGInsert(accountId)}, '${email}')
+                    (${stringifyForPGInsert(accountId)}, ${stringifyForPGInsert(email)})
                   RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id

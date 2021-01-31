@@ -1,24 +1,11 @@
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
 const { stringifyForPGInsert } = require('../utilities')
 
-async function storeLoginCredentials(credentials) {
-  try{
-    const { username, password } = credentials
-    const query = `INSERT INTO logins (username, password)
-                  VALUES ('${username}','${password}') RETURNING id`
-    const result = await submitTransaction(query)
-    return result.rows[0].id
-  } catch (err) {
-    console.error(err.stack)
-    throw new Error(err)
-  }
-}
-
-async function getLoginInfo(username) {
-  const query = `SELECT id, encode(password,'escape') as password FROM logins WHERE username = '${username}'`
+async function getPassword(username, password){
+  const query = `SELECT encode(password, 'escape') as password FROM accounts WHERE username = '${username}'`
   return pool
           .query(query)
-          .then(res => res.rows[0])
+          .then(res => res.rows[0].password)
           .catch(err => {
             console.error(err.stack)
             throw new Error(err)
@@ -27,9 +14,9 @@ async function getLoginInfo(username) {
 
 async function storeAccessToken(info) {
   try{
-    const { loginId,  token, expiration} = info
-    const query = `INSERT INTO access_tokens (login_id, token, expiration)
-                  VALUES (${loginId},'${token}','${expiration}') RETURNING id`
+    const { accountId,  token, expiration} = info
+    const query = `INSERT INTO access_tokens (account_id, token, expiration)
+                  VALUES (${accountId},'${token}','${expiration}') RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
@@ -38,9 +25,9 @@ async function storeAccessToken(info) {
   }
 }
 
-async function getAccessTokenLoginInfo(token) {
-  const query = `SELECT id, username FROM logins
-                WHERE id in (SELECT login_id FROM access_tokens
+async function getAccessTokenAccountInfo(token) {
+  const query = `SELECT id, username FROM accounts
+                WHERE id in (SELECT account_id FROM access_tokens
                             WHERE encode(token,'escape') = '${token}' and expiration >= now())`
   return pool
           .query(query)
@@ -52,8 +39,7 @@ async function getAccessTokenLoginInfo(token) {
 }
 
 module.exports = {
-  storeLoginCredentials,
-  getLoginInfo,
+  getPassword,
   storeAccessToken,
-  getAccessTokenLoginInfo,
+  getAccessTokenAccountInfo,
 }

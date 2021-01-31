@@ -7,8 +7,8 @@ const { authorizeAccessToken } = require('../middleware/auth')
 // Create new thread
 router.post('/threads', authorizeAccessToken, async function (req, res) {
   try {
-    const id = await createThread(req.body.users)
-    return res.send(`New Thread created ${id}"`)
+    const result = await createThread(req.body.users)
+    return res.send(result)
   } catch (err) {
     throw new Error(err)
     return res.status(400).json({error: 'Failed to create new thread'})

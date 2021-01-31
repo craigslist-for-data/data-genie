@@ -9,24 +9,15 @@ const { storeMessageThread,
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
-const { storeLoginCredentials,
-        getLoginInfo,
+const { getPassword,
         storeAccessToken,
-        getAccessTokenLoginInfo } = require('../models/auth')
+        getAccessTokenAccountInfo } = require('../models/auth')
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
 describe('Clear DB Data', function() {
   it('Should clear test data', async function() {
-    await submitTransaction('DELETE FROM feedback')
-    await submitTransaction('DELETE FROM invitations')
-    await submitTransaction('DELETE FROM messages')
-    await submitTransaction('DELETE FROM message_thread_users')
-    await submitTransaction('DELETE FROM message_threads')
-    await submitTransaction('DELETE FROM posts')
     await submitTransaction('DELETE FROM accounts')
-    await submitTransaction('DELETE FROM access_tokens')
-    await submitTransaction('DELETE FROM logins')
   })
 })
 
@@ -40,6 +31,7 @@ describe('Accounts Models Tests', function() {
     // Create new Account for testing
     const accountDetails = {
       username:'testAccount',
+      password:'testpass',
       name:'Test Account',
       email:'account@test.com',
       phone:'2123456780',
@@ -98,6 +90,7 @@ describe('Posts Models Tests', function() {
     // Create a new Post in DB
     const postContents = {
       accountId:accountId,
+      password:'testpass',
       topic:'TEST POST',
       usage:'Personal',
       purpose:'To Test Posting Functionality',
@@ -160,6 +153,7 @@ describe('Messages DB Tests', function() {
     // Create new Accounts for testing
     const accountDetails1 = {
       username:'testMessage1',
+      password: 'testpass',
       name:'Test Message1',
       email:'message1@test.com',
       phone:'9173456781',
@@ -171,6 +165,7 @@ describe('Messages DB Tests', function() {
     }
     const accountDetails2 = {
       username:'testMessage2',
+      password: 'testpass',
       name:'Test Message2',
       email:'message2@test.com',
       phone:'9173456782',
@@ -262,6 +257,7 @@ describe('Feedback DB Tests', function() {
         // Create new Account for testing
         const accountDetails = {
           username:'testFeedback',
+          password: 'testpass',
           name:'Test Feedback',
           email:'feedback@test.com',
           phone:'2123456783',
@@ -312,6 +308,7 @@ describe('Invitiations DB Tests', function() {
         // Create new Account for testing
         const accountDetails = {
           username:'testInvitation',
+          password: 'testpass',
           name:'Test Invitation',
           email:'invitation@test.com',
           phone:'2123456784',
@@ -340,45 +337,51 @@ describe('Invitiations DB Tests', function() {
 
 describe('Auth Models Tests', function() {
   it(`Should...
-      - Create new login credentials
-      - Verify login credentials
+      - Create Auth test account
+      - Check password
       - Create new access tokens
       - Verify access token
       - Verify expired access token`, async function() {
-
-        // Create new login credentials
-        const loginInfo = {
-          username:'AuthTest',
-          password:'testpassword'
+        // Create Auth test account
+        const authTestAccountDetails = {
+          username:'authTestAccount',
+          password:'testpass',
+          name:'Auth Test',
+          email:'auth@test.com',
+          phone:'9991113345',
+          linkedin:null,
+          github:null,
+          ssrn:null,
+          org:'TEST',
+          title:'TEST',
         }
-        const loginId = await storeLoginCredentials(loginInfo)
-        // Verify login credentials
-        const dbLoginInfo = await getLoginInfo(loginInfo.username)
-        expect(dbLoginInfo.password).to.equal(loginInfo.password)
-
+        const id = await storeAccount(authTestAccountDetails)
+        // Check password
+        const password = await getPassword(authTestAccountDetails.username)
+        expect(password).to.equal(authTestAccountDetails.password)
         //  Create new access tokens
         const futureTS = new Date(Date.now() + 10000).toISOString()
         const validAccessToken = {
-          loginId:loginId,
+          accountId:id,
           token:"validtesttoken",
           expiration:futureTS,
         }
         const validTokenId = await storeAccessToken(validAccessToken)
 
         // Verify access token
-        const accessTokenLogin = await getAccessTokenLoginInfo(validAccessToken.token)
-        expect(accessTokenLogin.id).to.equal(loginId)
-        expect(accessTokenLogin.username).to.equal(loginInfo.username)
+        const accessTokenLogin = await getAccessTokenAccountInfo(validAccessToken.token)
+        expect(accessTokenLogin.id).to.equal(id)
+        expect(accessTokenLogin.username).to.equal(authTestAccountDetails.username)
 
         // Verify expired access token
         const expiredTS = new Date(Date.now()).toISOString()
         const invalidAccessToken = {
-          loginId:loginId,
+          accountId:id,
           token:"invalidtesttoken",
           expiration:expiredTS,
         }
         const invalidTokenId = await storeAccessToken(invalidAccessToken)
-        const invalidatedAccessToken = await getAccessTokenLoginInfo(invalidAccessToken.token)
+        const invalidatedAccessToken = await getAccessTokenAccountInfo(invalidAccessToken.token)
         should.not.exist(invalidatedAccessToken)
       })
     })

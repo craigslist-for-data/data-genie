@@ -3,14 +3,15 @@ const { stringifyForPGInsert } = require('../utilities')
 
 async function storeAccount(accountDetails) {
   try{
-    const { username, name, email, phone, linkedin, github, ssrn, org, title } = accountDetails
+    const { username, password, name, email, phone, linkedin, github, ssrn, org, title } = accountDetails
     const query = `INSERT INTO accounts
-                    (username, name, email, phone, linkedin, github, ssrn, org, title)
+                    (username, password, name, email, phone, linkedin, github, ssrn, org, title)
                   VALUES
                     ('${username}',
+                    '${password}',
                     '${name}',
                     '${email}',
-                    ${phone},
+                    ${stringifyForPGInsert(phone)},
                     ${stringifyForPGInsert(linkedin)},
                     ${stringifyForPGInsert(github)},
                     ${stringifyForPGInsert(ssrn)},
