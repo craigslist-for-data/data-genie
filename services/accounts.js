@@ -13,7 +13,7 @@ async function createAccount(info) {
     const accountId = await storeAccount(info)
     // Store auth token
     const token = jwt.sign({ id: accountId }, hashedPassword)
-    const expiration = new Date(Date.now() + 1800000).toISOString()
+    const expiration = new Date(Date.now() + 25200000).toISOString()
     const accessTokenId = storeAccessToken({accountId:accountId,
                                             token:token,
                                             expiration:expiration})
