@@ -10,7 +10,7 @@ router.post('/threads', authorizeAccessToken, async function (req, res) {
     const result = await createThread(req.body.users)
     return res.send(result)
   } catch (err) {
-    throw new Error(err)
+    console.error(error)
     return res.status(400).json({error: 'Failed to create new thread'})
   }
 })
@@ -22,7 +22,7 @@ router.get('/threads/', authorizeAccessToken, async function (req, res) {
     const threads = await getMessageThreads(accountId)
     return res.send(threads)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: `Failed to get message threads for account ${accountId}`})
   }
 })
@@ -33,7 +33,7 @@ router.post('/', authorizeAccessToken, async function (req, res) {
     const id = await sendMessage(req.body)
     return res.send(`Message ${id} created!`)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to create new post'})
   }
 })
@@ -44,7 +44,7 @@ router.get('/:threadId', authorizeAccessToken, async function (req, res) {
     const messages = await getMessages(req.params.threadId)
     return res.send(messages)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to fetch messages'})
   }
 })

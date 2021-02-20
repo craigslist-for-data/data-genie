@@ -13,7 +13,7 @@ async function storeFeedback(feedback) {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -24,7 +24,7 @@ async function getFeedback(feedbackId) {
           .query(query)
           .then(res => res.rows[0])
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }

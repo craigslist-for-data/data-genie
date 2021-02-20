@@ -9,7 +9,7 @@ router.post('/', authorizeAccessToken, async function (req, res) {
     const id = await createPost(req.body)
     return res.send(`New Post created: "${req.body.topic}"`)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to create new post'})
   }
 })
@@ -21,7 +21,7 @@ router.get('/', async function (req, res) {
     const postBatch = await getBatchedPosts(req.query.index, req.query.batchSize)
     return res.send(postBatch)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to fetch posts'})
   }
 })
@@ -32,7 +32,7 @@ router.get('/:postId', async function (req, res) {
     const postDetails = await getIndividualPost(req.params.postId)
     return res.send(postDetails)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to fetch post details'})
   }
 })

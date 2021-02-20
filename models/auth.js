@@ -7,7 +7,7 @@ async function getPassword(username, password){
           .query(query)
           .then(res => res.rows[0].password)
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }
@@ -20,7 +20,7 @@ async function storeAccessToken(info) {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -33,7 +33,7 @@ async function getAccessTokenAccountInfo(token) {
           .query(query)
           .then(res => res.rows[0])
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }
