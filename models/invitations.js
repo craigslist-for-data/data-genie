@@ -12,7 +12,7 @@ async function storeInvitation(info) {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -23,7 +23,7 @@ async function getInvitation(id) {
           .query(query)
           .then(res => res.rows[0])
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }

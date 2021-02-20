@@ -8,7 +8,7 @@ router.post('/', async function (req, res) {
     const feedbackId = await submitFeedback(req.body)
     return res.send(`Thanks for your feedback!`)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to submit feedback'})
   }
 })

@@ -7,7 +7,7 @@ async function storeMessageThread() {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch(err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -18,7 +18,7 @@ async function storeMessageThreadUser(threadId, accountId) {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch(err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -29,7 +29,7 @@ async function getAccounts(threadId) {
           .query(query)
           .then(res => res.rows)
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }
@@ -40,7 +40,7 @@ async function getThreads(accountId) {
           .query(query)
           .then(res => res.rows)
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }
@@ -58,7 +58,7 @@ async function storeMessage(messageContents) {
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch (err) {
-    console.error(err.stack)
+    console.error(err)
     throw new Error(err)
   }
 }
@@ -69,7 +69,7 @@ async function getMessagesInThread(threadId) {
           .query(query)
           .then(res => res.rows)
           .catch(err => {
-            console.error(err.stack)
+            console.error(err)
             throw new Error(err)
           })
 }

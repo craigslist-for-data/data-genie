@@ -14,8 +14,10 @@ async function createThread(users) {
     // Check if threadId exists
     const threadId = await storeMessageThread()
     const threadUsers =  await Promise.all(users.map(function(x) {return storeMessageThreadUser(threadId, x.accountId)}))
-    return {"threadId":threadId,
-            "users":threadUsers}
+    return {
+      threadId: threadId,
+      users: threadUsers
+    }
   } catch (err) {
     console.error(err)
     throw new Error(err)

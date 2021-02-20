@@ -8,7 +8,7 @@ router.post('/', async function (req, res) {
     const feedbackId = await sendInvitation(req.body)
     return res.send(`Your invitation has been sent!`)
   } catch (err) {
-    throw new Error(err)
+    console.error(err)
     return res.status(400).json({error: 'Failed to send invitations :('})
   }
 })
