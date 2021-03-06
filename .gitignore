@@ -1,3 +1,8 @@
 secrets.js
 dockerize.js
 to do.txt
+gcloud*
+node_modules
+*.crt
+*.key
+*.pem

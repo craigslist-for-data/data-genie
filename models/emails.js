@@ -1,5 +1,5 @@
 const sgMail = require('@sendgrid/mail')
-const secrets = require('../secrets.js')
+const { SENDGRID_API_KEY } = require('../secrets.js')
 sgMail.setApiKey(SENDGRID_API_KEY)
 
 async function sendEmail(msg) {
