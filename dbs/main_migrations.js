@@ -58,11 +58,13 @@ async function runDatabaseMigrations() {
                           )`
                         )
 
-  await submitTransaction(`CREATE TABLE IF NOT EXISTS message_thread_users (
+  await submitTransaction(`CREATE TABLE IF NOT EXISTS message_thread_info (
                             id SERIAL NOT NULL PRIMARY KEY,
                             thread_id INTEGER NOT NULL REFERENCES message_threads(id) ON DELETE CASCADE,
+                            post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
                             account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
                             created_at TIMESTAMP NOT NULL DEFAULT now(),
+                            CONSTRAINT unique_post_id_account_id UNIQUE (post_id, account_id),
                             CONSTRAINT unique_thread_id_account_id UNIQUE (thread_id, account_id)
                           )`
                         )

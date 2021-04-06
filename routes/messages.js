@@ -1,13 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const { createThread, getMessageThreads, sendMessage, getMessages } = require('../services/messages')
+const { createMessageThread, getMessageThreads, sendMessage, getMessages } = require('../services/messages')
 const { getAccountIdFromAccessToken } = require('../services/auth')
 const { authorizeAccessToken } = require('../middleware/auth')
 
 // Create new thread
 router.post('/threads', authorizeAccessToken, async function (req, res) {
   try {
-    const result = await createThread(req.body.users)
+    const result = await createMessageThread(req.body)
     return res.send(result)
   } catch (err) {
     console.error(error)

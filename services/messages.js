@@ -1,22 +1,46 @@
 const { storeMessageThread,
-        storeMessageThreadUser,
+        storeMessageThreadInfo,
+        getMessageThreadId,
         getThreads,
         getAccounts,
         storeMessage,
         getMessagesInThread
       } = require('../models/messages')
+const { getPost } = require('../models/posts')
 const { getAccountInfo } = require('../models/accounts')
 const {sendEmail} = require('../models/emails.js')
 
 // Create message thread
-async function createThread(users) {
+async function createMessageThread(info) {
   try {
-    // Check if threadId exists
+    const { accountId, postId } = info
+    // TO DO: Check if message thread already exists for account + post
+    const thread = await getMessageThreadId(accountId, postId)
+    if (Boolean(thread)){
+      return {
+        threadId: thread.thread_id
+      }
+    }
+    // Create message thread
     const threadId = await storeMessageThread()
-    const threadUsers =  await Promise.all(users.map(function(x) {return storeMessageThreadUser(threadId, x.accountId)}))
-    return {
+    // Store message thread info
+    const postDetails = await getPost(postId)
+    // Store message thread info for post creator
+    const messageThreadInfoCreator = {
       threadId: threadId,
-      users: threadUsers
+      postId: postId,
+      accountId: postDetails.account_id,
+    }
+    storeMessageThreadInfo(messageThreadInfoCreator)
+    // Store message thread info for post responder
+    const messageThreadInfoResponder = {
+      threadId: threadId,
+      postId: postId,
+      accountId: accountId,
+    }
+    storeMessageThreadInfo(messageThreadInfoResponder)
+    return {
+      threadId: threadId
     }
   } catch (err) {
     console.error(err)
@@ -71,7 +95,7 @@ async function getMessages(threadId){
 }
 
 module.exports = {
-  createThread,
+  createMessageThread,
   getMessageThreads,
   sendMessage,
   getMessages,

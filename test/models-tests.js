@@ -1,11 +1,15 @@
 const should = require('chai').should()
 const expect = require('chai').expect
 const { storeAccount,  getAccountInfo, getAccountId } = require('../models/accounts')
-const { storeMessageThread,
-        storeMessageThreadUser,
-        getAccounts, getThreads,
-        storeMessage,
-        getMessagesInThread } = require('../models/messages')
+const {
+  storeMessageThread,
+  storeMessageThreadInfo,
+  getMessageThreadId,
+  getAccounts,
+  getThreads,
+  storeMessage,
+  getMessagesInThread,
+} = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
 const { storeInvitation, getInvitation } = require('../models/invitations')
@@ -13,6 +17,15 @@ const { getPassword,
         storeAccessToken,
         getAccessTokenAccountInfo } = require('../models/auth')
 const { pool, submitTransaction } = require('../dbs/pg_helpers')
+const { runDatabaseMigrations } = require('../dbs/main_migrations')
+
+// RUN DB Migrations
+describe('DB Migrations Tests', function() {
+  it(`Should...
+    - Run DB Migrations`, async function() {
+      await runDatabaseMigrations()
+    })
+})
 
 // CLEAR ALL TEST DATA BEFORE PROCEEDING
 describe('Clear DB Data', function() {
@@ -90,7 +103,6 @@ describe('Posts Models Tests', function() {
     // Create a new Post in DB
     const postContents = {
       accountId:accountId,
-      password:'testpass',
       topic:'TEST POST',
       usage:'Personal',
       purpose:'To Test Posting Functionality',
@@ -132,24 +144,14 @@ describe('Posts Models Tests', function() {
 // TEST MESSAGE MODELS
 describe('Messages DB Tests', function() {
   it(`Should...
-      - Create & Check Message Threads in the DB
       - Create new Accounts for testing
+      - Create a new Post in DB
+      - Create & Check Message Threads in the DB
       - Create & Check Message Thread Users in the DB
+      - Get & Check Message threadId by accountId & postId
       - Create a Message in the DB
       - Check Message was inserted correctly into DB
       - Insert additional message and ensure it was added to the thread`, async function() {
-
-    // Create & Check Message Threads in the DB
-    const threadId1 = await storeMessageThread()
-    const maxThreadId = await pool
-                                .query(`SELECT max(id) FROM message_threads`)
-                                .then(res => res.rows[0].max)
-                                .catch(err => console.error(err.stack))
-    expect(threadId1).to.equal(maxThreadId)
-
-    const threadId2 = await storeMessageThread()
-    expect(threadId2).to.be.above(maxThreadId)
-
     // Create new Accounts for testing
     const accountDetails1 = {
       username:'testMessage1',
@@ -177,10 +179,40 @@ describe('Messages DB Tests', function() {
     }
     const accountId1 = await storeAccount(accountDetails1)
     const accountId2 = await storeAccount(accountDetails2)
+    // Create a new Post in DB
+    const postContents = {
+      accountId:accountId1,
+      topic:'TEST MESSAGE',
+      usage:'Personal',
+      purpose:'To Test Messaging Functionality',
+      briefDesc:'N/A',
+      detailedDesc:'N/A',
+      links:null,
+    }
+    const id = await storePost(postContents)
+    // Create & Check Message Threads in the DB
+    const threadId1 = await storeMessageThread(id)
+    const maxThreadId = await pool
+                                .query(`SELECT max(id) FROM message_threads`)
+                                .then(res => res.rows[0].max)
+                                .catch(err => console.error(err.stack))
+    expect(threadId1).to.equal(maxThreadId)
 
+    const threadId2 = await storeMessageThread(id)
+    expect(threadId2).to.be.above(maxThreadId)
     // Create & Check Message Thread Users in the DB
-    const messageThread1UserId1 = await storeMessageThreadUser(threadId1, accountId1)
-    const messageThread1UserId2 = await storeMessageThreadUser(threadId1, accountId2)
+    const messageThreadInfo1 = {
+      threadId: threadId1,
+      postId: id,
+      accountId: accountId1,
+    }
+    const messageThreadInfo2 = {
+      threadId: threadId1,
+      postId: id,
+      accountId: accountId2,
+    }
+    const messageThread1UserId1 = await storeMessageThreadInfo(messageThreadInfo1)
+    const messageThread1UserId2 = await storeMessageThreadInfo(messageThreadInfo2)
 
     function getAccountElement(row) {
       return row['account_id']
@@ -195,8 +227,13 @@ describe('Messages DB Tests', function() {
     const account2Threads = await getThreads(accountId2)
     expect(account1Threads[0].thread_id).to.equal(threadId1)
     expect(account2Threads[0].thread_id).to.equal(threadId1)
-
-
+    // Get & Check Message threadId by accountId & postId
+    const existingThreadId = await getMessageThreadId(accountId1, id)
+    const nonexistantThreadId1 = await getMessageThreadId(accountId1, 0)
+    const nonexistantThreadId2 = await getMessageThreadId(0, id)
+    expect(existingThreadId.thread_id).to.equal(threadId1)
+    should.not.exist(nonexistantThreadId1)
+    should.not.exist(nonexistantThreadId2)
     // Create a Message in the DB
     const messageContent1 = {
       threadId:threadId1,
