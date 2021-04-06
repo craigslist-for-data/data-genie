@@ -77,8 +77,28 @@ async function getAccountDetails(id){
   }
 }
 
+async function getPublicAccountDetails(id){
+  try {
+    const accountDetails = await getAccountInfo(id)
+    return {
+      accountId:accountDetails.id,
+      username:accountDetails.username,
+      name:accountDetails.name,
+      linkedin:accountDetails.linkedin,
+      github:accountDetails.github,
+      ssrn:accountDetails.ssrn,
+      org:accountDetails.org,
+      title:accountDetails.title,
+    }
+  } catch (err) {
+    console.error(err)
+    throw new Error(err)
+  }
+}
+
 module.exports = {
   createAccount,
   loginAccount,
   getAccountDetails,
+  getPublicAccountDetails,
 }
