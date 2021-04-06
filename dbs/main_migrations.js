@@ -1,9 +1,10 @@
 const { submitTransaction } = require('./pg_helpers');
+const { db } = require('../config')
 
 // CREATE TABLES in main DB
 
 async function runDatabaseMigrations() {
-  await submitTransaction(`ALTER DATABASE data_genie SET timezone TO 'GMT'`)
+  await submitTransaction(`ALTER DATABASE "${db.database}" SET timezone TO 'GMT'`)
 
   await submitTransaction(`CREATE TABLE IF NOT EXISTS accounts (
                             id SERIAL PRIMARY KEY NOT NULL,

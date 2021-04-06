@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: web
+    spec:
+      serviceAccountName: cloud-sql-proxy-sa
+      containers:
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.17
+        imagePullPolicy: Always
+        name: cloud-sql-proxy
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=data-genie-306816:us-central1:data-genie-dbs=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
+      - image: gcr.io/data-genie-306816/data-genie-backend:1.0.0
+        imagePullPolicy: Always
+        name: backend
+        ports:
+        - containerPort: 8080
+          name: web-app-port
+        env:
+        - name: NODE_ENV
+          value: "prod"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
