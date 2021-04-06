@@ -9,7 +9,7 @@ router.post('/', async function (req, res) {
     return res.send(`Your invitation has been sent!`)
   } catch (err) {
     console.error(err)
-    return res.status(400).json({error: 'Failed to send invitations :('})
+    return res.status(500).json({error: 'Failed to send invitations :('})
   }
 })
 
