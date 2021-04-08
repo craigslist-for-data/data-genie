@@ -1,16 +1,16 @@
 const express = require('express')
 const router = express.Router()
 const { createPost, getBatchedPosts, getIndividualPost } = require('../services/posts')
-const { authorizeAccessToken } = require('../middleware/auth')
+const { authorizeAccessToken, authorizeAccessTokenBody } = require('../middleware/auth')
 
 // Create new post
-router.post('/', authorizeAccessToken, async function (req, res) {
+router.post('/', authorizeAccessTokenBody, async function (req, res) {
   try {
     const id = await createPost(req.body)
     return res.send(`New Post created: "${req.body.topic}"`)
   } catch (err) {
     console.error(err)
-    return res.status(400).json({error: 'Failed to create new post'})
+    return res.status(500).json({error: 'Failed to create new post'})
   }
 })
 
@@ -22,7 +22,7 @@ router.get('/', async function (req, res) {
     return res.send(postBatch)
   } catch (err) {
     console.error(err)
-    return res.status(400).json({error: 'Failed to fetch posts'})
+    return res.status(500).json({error: 'Failed to fetch posts'})
   }
 })
 
@@ -33,7 +33,7 @@ router.get('/:postId', async function (req, res) {
     return res.send(postDetails)
   } catch (err) {
     console.error(err)
-    return res.status(400).json({error: 'Failed to fetch post details'})
+    return res.status(500).json({error: 'Failed to fetch post details'})
   }
 })
 

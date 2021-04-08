@@ -12,9 +12,10 @@ async function storeMessageThread() {
   }
 }
 
-async function storeMessageThreadUser(threadId, accountId) {
+async function storeMessageThreadInfo(messageThreadInfo) {
   try {
-    const query = `INSERT INTO message_thread_users (thread_id, account_id) VALUES (${threadId},${accountId}) RETURNING id`
+    const { threadId, postId, accountId } = messageThreadInfo
+    const query = `INSERT INTO message_thread_info (thread_id, post_id, account_id) VALUES (${threadId},${postId},${accountId}) RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id
   } catch(err) {
@@ -23,8 +24,19 @@ async function storeMessageThreadUser(threadId, accountId) {
   }
 }
 
+async function getMessageThreadId(accountId, postId) {
+  const query = `SELECT thread_id FROM message_thread_info WHERE account_id = ${accountId} AND post_id = ${postId}`
+  return pool
+          .query(query)
+          .then(res => res.rows[0])
+          .catch(err => {
+            console.error(err)
+            throw new Error(err)
+          })
+}
+
 async function getAccounts(threadId) {
-  const query = `SELECT account_id FROM message_thread_users WHERE thread_id = ${threadId}`
+  const query = `SELECT account_id FROM message_thread_info WHERE thread_id = ${threadId}`
   return pool
           .query(query)
           .then(res => res.rows)
@@ -35,7 +47,7 @@ async function getAccounts(threadId) {
 }
 
 async function getThreads(accountId) {
-  const query = `SELECT thread_id FROM message_thread_users WHERE account_id = ${accountId}`
+  const query = `SELECT thread_id FROM message_thread_info WHERE account_id = ${accountId}`
   return pool
           .query(query)
           .then(res => res.rows)
@@ -76,7 +88,8 @@ async function getMessagesInThread(threadId) {
 
 module.exports = {
   storeMessageThread,
-  storeMessageThreadUser,
+  storeMessageThreadInfo,
+  getMessageThreadId,
   getAccounts,
   getThreads,
   storeMessage,
