@@ -7,6 +7,7 @@ const {
   getMessageThreadId,
   getAccounts,
   getThreads,
+  getThreadInfo,
   storeMessage,
   getMessagesInThread,
 } = require('../models/messages')
@@ -147,7 +148,8 @@ describe('Messages DB Tests', function() {
       - Create new Accounts for testing
       - Create a new Post in DB
       - Create & Check Message Threads in the DB
-      - Create & Check Message Thread Users in the DB
+      - Create & Check Message Thread Info in the DB
+      - Get & Check Message Thread Info
       - Get & Check Message threadId by accountId & postId
       - Create a Message in the DB
       - Check Message was inserted correctly into DB
@@ -200,7 +202,7 @@ describe('Messages DB Tests', function() {
 
     const threadId2 = await storeMessageThread(id)
     expect(threadId2).to.be.above(maxThreadId)
-    // Create & Check Message Thread Users in the DB
+    // Create & Check Message Thread Info in the DB
     const messageThreadInfo1 = {
       threadId: threadId1,
       postId: id,
@@ -227,6 +229,14 @@ describe('Messages DB Tests', function() {
     const account2Threads = await getThreads(accountId2)
     expect(account1Threads[0].thread_id).to.equal(threadId1)
     expect(account2Threads[0].thread_id).to.equal(threadId1)
+    // Get & Check Message Thread Info
+    const messageThreadInfo = await getThreadInfo(threadId1)
+    console.log(messageThreadInfo)
+    expect(messageThreadInfo.length).to.equal(2)
+    expect(messageThreadInfo[0].post_id).to.equal(id)
+    expect(messageThreadInfo[1].post_id).to.equal(id)
+    expect(messageThreadInfo[0].account_id).to.equal(accountId1)
+    expect(messageThreadInfo[1].account_id).to.equal(accountId2)
     // Get & Check Message threadId by accountId & postId
     const existingThreadId = await getMessageThreadId(accountId1, id)
     const nonexistantThreadId1 = await getMessageThreadId(accountId1, 0)

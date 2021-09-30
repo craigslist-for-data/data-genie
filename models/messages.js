@@ -57,6 +57,17 @@ async function getThreads(accountId) {
           })
 }
 
+async function getThreadInfo(threadId) {
+  const query = `SELECT post_id, account_id, created_at FROM message_thread_info WHERE thread_id = ${threadId}`
+  return pool
+          .query(query)
+          .then(res => res.rows)
+          .catch(err => {
+            console.error(err)
+            throw new Error(err)
+          })
+}
+
 async function storeMessage(messageContents) {
   try {
     const { threadId, accountId, message } = messageContents
@@ -92,6 +103,7 @@ module.exports = {
   getMessageThreadId,
   getAccounts,
   getThreads,
+  getThreadInfo,
   storeMessage,
   getMessagesInThread,
 }
