@@ -10,6 +10,9 @@ const {
   getThreadInfo,
   storeMessage,
   getMessagesInThread,
+  updateReadMessages,
+  getUnreadMessagesInThread,
+  getLastNMessagesInThread,
 } = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
 const { storeFeedback, getFeedback } = require('../models/feedback')
@@ -153,7 +156,11 @@ describe('Messages DB Tests', function() {
       - Get & Check Message threadId by accountId & postId
       - Create a Message in the DB
       - Check Message was inserted correctly into DB
-      - Insert additional message and ensure it was added to the thread`, async function() {
+      - Insert additional message and ensure it was added to the thread
+      - Get all unread messages
+      - Update read status of message thread
+      - Get all unread messages
+      - Get last message info`, async function() {
     // Create new Accounts for testing
     const accountDetails1 = {
       username:'testMessage1',
@@ -231,8 +238,9 @@ describe('Messages DB Tests', function() {
     expect(account2Threads[0].thread_id).to.equal(threadId1)
     // Get & Check Message Thread Info
     const messageThreadInfo = await getThreadInfo(threadId1)
-    console.log(messageThreadInfo)
     expect(messageThreadInfo.length).to.equal(2)
+    expect(messageThreadInfo[0].thread_id).to.equal(threadId1)
+    expect(messageThreadInfo[1].thread_id).to.equal(threadId1)
     expect(messageThreadInfo[0].post_id).to.equal(id)
     expect(messageThreadInfo[1].post_id).to.equal(id)
     expect(messageThreadInfo[0].account_id).to.equal(accountId1)
@@ -259,6 +267,7 @@ describe('Messages DB Tests', function() {
     expect(initialMessage.thread_id).to.equal(messageContent1.threadId)
     expect(initialMessage.account_id).to.equal(messageContent1.accountId)
     expect(initialMessage.message).to.equal(messageContent1.message)
+    expect(initialMessage.read).to.equal(false)
     expect(initialMessageThread.length).to.equal(1)
 
     // Insert additional message and ensure it was added to the thread
@@ -275,7 +284,22 @@ describe('Messages DB Tests', function() {
     expect(replyMessage.thread_id).to.equal(messageContent2.threadId)
     expect(replyMessage.account_id).to.equal(messageContent2.accountId)
     expect(replyMessage.message).to.equal(messageContent2.message)
+    expect(replyMessage.read).to.equal(false)
     expect(initialMessageThread.length).to.equal(1)
+    // Get all unread messages
+    const unreadMessages = await getUnreadMessagesInThread(threadId1)
+    expect(unreadMessages.length).to.equal(2)
+    expect(unreadMessages[0].id).to.equal(initialMessageId)
+    expect(unreadMessages[1].id).to.equal(replyMessageId)
+    // Update read status of message thread
+    const readMessages = await updateReadMessages(threadId1)
+    // Get all unread messages
+    const unreadMessagesPost = await getUnreadMessagesInThread(threadId1)
+    expect(unreadMessagesPost.length).to.equal(0)
+    // Get last message info
+    const lastMessage = await getLastNMessagesInThread(threadId1, 1)
+    expect(lastMessage.length).to.equal(1)
+    expect(lastMessage[0].id).to.equal(replyMessageId)
   })
 })
 

@@ -2,9 +2,13 @@ const { storeMessageThread,
         storeMessageThreadInfo,
         getMessageThreadId,
         getThreads,
+        getThreadInfo,
         getAccounts,
         storeMessage,
-        getMessagesInThread
+        getMessagesInThread,
+        updateReadMessages,
+        getUnreadMessagesInThread,
+        getLastNMessagesInThread,
       } = require('../models/messages')
 const { getPost } = require('../models/posts')
 const { getAccountInfo } = require('../models/accounts')
@@ -51,8 +55,42 @@ async function createMessageThread(info) {
 // Get all message threads for account
 async function getMessageThreads(accountId) {
   try {
-    const threads = getThreads(accountId)
-    return threads
+    const threads = await getThreads(accountId)
+    const threadInfo = await Promise.all(threads.map(thread => getThreadInfo(thread.thread_id)))
+    const threadInfoFull = await Promise.all(threadInfo.flat().map(async (info) => {
+      if (info.account_id!=accountId){
+        const accountInfo = await getAccountInfo(info.account_id)
+        const postInfo = await getPost(info.post_id)
+        const unreadMessages = await getUnreadMessagesInThread(info.thread_id)
+        const unreadMessagesCount = unreadMessages.length
+        const lastMessages = await getLastNMessagesInThread(info.thread_id, 1)
+        const lastMessage = lastMessages[0]
+        console.log('Account Info: ', accountInfo)
+        console.log('Post Info: ', postInfo)
+        console.log('Unread Messages: ', unreadMessages)
+        console.log('Unread Messages Count: ', unreadMessagesCount)
+        console.log('lastMessage: ', lastMessage)
+        return {
+          thread_id: info.thread_id,
+          unread_messages: unreadMessagesCount,
+          last_message: {
+            last_message: lastMessage.message,
+            sender_account_id: lastMessage.account_id,
+            created_at: lastMessage.created_at,
+          },
+          post: {
+            id: info.post_id,
+            brief_description: postInfo.brief_description,
+          },
+          account: {
+            id: accountInfo.id,
+            username: accountInfo.username,
+          },
+        }
+      }
+    }))
+    const returnInfo = threadInfoFull.filter(x => x)
+    return returnInfo
   } catch (err) {
     console.error(err)
     throw new Error(err)

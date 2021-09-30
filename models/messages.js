@@ -58,7 +58,7 @@ async function getThreads(accountId) {
 }
 
 async function getThreadInfo(threadId) {
-  const query = `SELECT post_id, account_id, created_at FROM message_thread_info WHERE thread_id = ${threadId}`
+  const query = `SELECT thread_id, post_id, account_id, created_at FROM message_thread_info WHERE thread_id = ${threadId}`
   return pool
           .query(query)
           .then(res => res.rows)
@@ -97,6 +97,39 @@ async function getMessagesInThread(threadId) {
           })
 }
 
+async function updateReadMessages(threadId) {
+  try {
+    const query = `UPDATE messages SET read = true WHERE thread_id = ${threadId}`
+    const result = await submitTransaction(query)
+    return result.rows
+  } catch (err) {
+    console.error(err)
+    throw new Error(err)
+  }
+}
+
+async function getUnreadMessagesInThread(threadId) {
+  const query = `SELECT id FROM messages WHERE thread_id = ${threadId} and read = false`
+  return pool
+          .query(query)
+          .then(res => res.rows)
+          .catch(err => {
+            console.error(err)
+            throw new Error(err)
+          })
+}
+
+async function getLastNMessagesInThread(threadId, n) {
+  const query = `SELECT * FROM messages WHERE thread_id = ${threadId} ORDER BY created_at DESC LIMIT ${n}`
+  return pool
+          .query(query)
+          .then(res => res.rows)
+          .catch(err => {
+            console.error(err)
+            throw new Error(err)
+          })
+}
+
 module.exports = {
   storeMessageThread,
   storeMessageThreadInfo,
@@ -106,4 +139,7 @@ module.exports = {
   getThreadInfo,
   storeMessage,
   getMessagesInThread,
+  updateReadMessages,
+  getUnreadMessagesInThread,
+  getLastNMessagesInThread,
 }

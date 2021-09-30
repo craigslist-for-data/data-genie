@@ -64,7 +64,6 @@ async function runDatabaseMigrations() {
                             post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
                             account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
                             created_at TIMESTAMP NOT NULL DEFAULT now(),
-                            CONSTRAINT unique_post_id_account_id UNIQUE (post_id, account_id),
                             CONSTRAINT unique_thread_id_account_id UNIQUE (thread_id, account_id)
                           )`
                         )
@@ -74,6 +73,7 @@ async function runDatabaseMigrations() {
                             thread_id INTEGER NOT NULL REFERENCES message_threads(id) ON DELETE CASCADE,
                             account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
                             message TEXT NOT NULL,
+                            read BOOLEAN NOT NULL DEFAULT false,
                             created_at TIMESTAMP NOT NULL DEFAULT now()
                           )`
                         )
