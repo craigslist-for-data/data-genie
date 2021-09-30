@@ -65,11 +65,6 @@ async function getMessageThreads(accountId) {
         const unreadMessagesCount = unreadMessages.length
         const lastMessages = await getLastNMessagesInThread(info.thread_id, 1)
         const lastMessage = lastMessages[0]
-        console.log('Account Info: ', accountInfo)
-        console.log('Post Info: ', postInfo)
-        console.log('Unread Messages: ', unreadMessages)
-        console.log('Unread Messages Count: ', unreadMessagesCount)
-        console.log('lastMessage: ', lastMessage)
         return {
           thread_id: info.thread_id,
           unread_messages: unreadMessagesCount,
