@@ -119,8 +119,30 @@ async function sendMessage(message){
 // Get messages in thread
 async function getMessages(threadId){
   try {
-    const messages = getMessagesInThread(threadId)
-    return messages
+    const threadInfo = await getThreadInfo(threadId)
+    const postId = threadInfo[0].post_id
+    const postInfo = await getPost(postId)
+    const participantsInfo = await Promise.all(threadInfo.map(async (info) => {
+      return getAccountInfo(info.account_id)
+    }))
+    const participantsInfoFiltered = participantsInfo.map(x => {
+      return {
+        account_id: x.id,
+        username: x.username,
+      }
+    })
+    const messages = await getMessagesInThread(threadId)
+    const returnObject = {
+      thread_id: threadId,
+      post_info: {
+        account_id: postInfo.account_id,
+        brief_description: postInfo.brief_description,
+        created_at: postInfo.created_at,
+      },
+      participants_info: participantsInfoFiltered,
+      messages: messages,
+    }
+    return returnObject
   } catch (err) {
     console.error(err)
     throw new Error(err)
