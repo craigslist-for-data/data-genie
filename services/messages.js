@@ -35,14 +35,14 @@ async function createMessageThread(info) {
       postId: postId,
       accountId: postDetails.account_id,
     }
-    storeMessageThreadInfo(messageThreadInfoCreator)
+    const creatorInfo = await storeMessageThreadInfo(messageThreadInfoCreator)
     // Store message thread info for post responder
     const messageThreadInfoResponder = {
       threadId: threadId,
       postId: postId,
       accountId: accountId,
     }
-    storeMessageThreadInfo(messageThreadInfoResponder)
+    const responderInfo = await storeMessageThreadInfo(messageThreadInfoResponder)
     return {
       threadId: threadId
     }
