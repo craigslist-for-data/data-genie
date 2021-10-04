@@ -33,6 +33,7 @@ async function getBatchedPosts(index, batchSize){
 async function getIndividualPost(id){
   try {
     const postDetails = await getPost(id)
+    postDetails.github_link = (postDetails.github_path) ? `https://github.com${postDetails.github_path}` : null
     const accountInfo = await getAccountInfo(postDetails.account_id)
     postDetails['username'] = accountInfo.username
     return postDetails
