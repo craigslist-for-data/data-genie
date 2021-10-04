@@ -107,12 +107,11 @@ describe('Posts Models Tests', function() {
     // Create a new Post in DB
     const postContents = {
       accountId:accountId,
-      topic:'TEST POST',
       usage:'Personal',
-      purpose:'To Test Posting Functionality',
-      briefDesc:'N/A',
-      detailedDesc:'N/A',
-      links:null,
+      briefDesc:'To Test Posting Functionality',
+      detailedDesc:'We need to test posting functionality to make sure the app is working properly.',
+      websiteLink:null,
+      githubPath:null,
     }
     const id = await storePost(postContents)
 
@@ -121,12 +120,11 @@ describe('Posts Models Tests', function() {
     // Return correct Post content
     expect(newPost.id).to.equal(id)
     expect(newPost.account_id).to.equal(postContents.accountId)
-    expect(newPost.topic).to.equal(postContents.topic)
     expect(newPost.usage).to.equal(postContents.usage)
-    expect(newPost.purpose).to.equal(postContents.purpose)
     expect(newPost.brief_description).to.equal(postContents.briefDesc)
     expect(newPost.detailed_description).to.equal(postContents.detailedDesc)
-    should.not.exist(newPost.links)
+    should.not.exist(newPost.website_link)
+    should.not.exist(newPost.github_path)
 
     // Create Batches of Posts
     let i;

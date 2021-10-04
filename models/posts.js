@@ -3,17 +3,16 @@ const { stringifyForPGInsert } = require('../utilities')
 
 async function storePost(postContents) {
   try{
-    const { accountId, topic, usage, purpose, briefDesc, detailedDesc, links } = postContents
+    const { accountId, usage, briefDesc, detailedDesc, websiteLink, githubPath } = postContents
     const query = `INSERT INTO posts
-                    (account_id, topic, usage, purpose, brief_description, detailed_description, links)
+                    (account_id, usage, brief_description, detailed_description, website_link, github_path)
                   VALUES
                     (${accountId},
-                    ${stringifyForPGInsert(topic)},
                     '${usage}',
-                    ${stringifyForPGInsert(purpose)},
                     ${stringifyForPGInsert(briefDesc)},
                     ${stringifyForPGInsert(detailedDesc)},
-                    ${stringifyForPGInsert(links)})
+                    ${stringifyForPGInsert(websiteLink)},
+                    ${stringifyForPGInsert(githubPath)})
                   RETURNING id`
     const result = await submitTransaction(query)
     return result.rows[0].id

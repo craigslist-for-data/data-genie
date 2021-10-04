@@ -42,12 +42,11 @@ async function runDatabaseMigrations() {
                           CREATE TABLE IF NOT EXISTS posts (
                             id SERIAL PRIMARY KEY NOT NULL,
                             account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-                            topic VARCHAR(128) NOT NULL,
                             usage usage_enum NOT NULL,
-                            purpose VARCHAR(128) NOT NULL,
                             brief_description VARCHAR(128) NOT NULL,
                             detailed_description TEXT NOT NULL,
-                            links TEXT,
+                            website_link VARCHAR(64),
+                            github_path VARCHAR(64),
                             created_at TIMESTAMP NOT NULL DEFAULT now()
                           )`
                         )
