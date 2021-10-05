@@ -103,6 +103,8 @@ async function getMessageThreads(accountId) {
 async function sendMessage(message){
   try {
     const messageId = storeMessage(message)
+    const postInfo = await getPost(message.postId)
+    const senderAccountInfo = await getAccountInfo(message.accountId)
     const threadAccounts = await getAccounts(message.threadId)
     const sendAccounts = threadAccounts.filter(x => x.account_id !== message.accountId)
     const accountsDetails = await Promise.all(sendAccounts.map(x => getAccountInfo(x.account_id)))
@@ -110,8 +112,11 @@ async function sendMessage(message){
     const msgs = accountsDetails.map(x => msg = {
                                       to: x.email,
                                       from: 'craigslistfordata@gmail.com',
-                                      subject: `New Data Genie Message!`,
-                                      text: message.message,
+                                      subject: `Re: ${postInfo.brief_description}`,
+                                      text: `New message from ${senderAccountInfo.username} regarding "${postInfo.brief_description}"
+
+                                      Click here to view message thread: https://localhost:3000/message/${message.threadId}
+                                      `,
                                       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
                                     })
     msgs.map(x => sendEmail(x))
@@ -141,6 +146,7 @@ async function getMessages(threadId){
     const returnObject = {
       thread_id: threadId,
       post_info: {
+        post_id: postInfo.id,
         account_id: postInfo.account_id,
         brief_description: postInfo.brief_description,
         created_at: postInfo.created_at,
