@@ -7,7 +7,7 @@ const { storeMessageThread,
         storeMessage,
         getMessagesInThread,
         updateReadMessages,
-        getUnreadMessagesInThread,
+        getUnreadMessagesInThreadForAccountId,
         getLastNMessagesInThread,
       } = require('../models/messages')
 const { getPost } = require('../models/posts')
@@ -61,9 +61,8 @@ async function getMessageThreads(accountId) {
       if (info.account_id!=accountId){
         const accountInfo = await getAccountInfo(info.account_id)
         const postInfo = await getPost(info.post_id)
-        const unreadMessages = await getUnreadMessagesInThread(info.thread_id)
-        const unreadMessagesFiltered = unreadMessages.filter(x => (x.account_id!=accountId))
-        const unreadMessagesCount = unreadMessagesFiltered.length
+        const unreadMessages = await getUnreadMessagesInThreadForAccountId(info.thread_id, accountId)
+        const unreadMessagesCount = unreadMessages.length
         const lastMessages = await getLastNMessagesInThread(info.thread_id, 1)
         const lastMessage = lastMessages[0]
         if (lastMessage) {
@@ -115,7 +114,6 @@ async function sendMessage(message){
                                       text: message.message,
                                       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
                                     })
-    console.log(msgs)
     msgs.map(x => sendEmail(x))
     return messageId
   } catch (err) {
@@ -157,9 +155,20 @@ async function getMessages(threadId){
   }
 }
 
+async function readMessages(threadId, accountId){
+  try {
+    updateReadMessages(threadId, accountId)
+    return
+  } catch (err) {
+    console.error(err)
+    throw new Error(err)
+  }
+}
+
 module.exports = {
   createMessageThread,
   getMessageThreads,
   sendMessage,
   getMessages,
+  readMessages,
 }

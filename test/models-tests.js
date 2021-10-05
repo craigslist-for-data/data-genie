@@ -11,7 +11,7 @@ const {
   storeMessage,
   getMessagesInThread,
   updateReadMessages,
-  getUnreadMessagesInThread,
+  getUnreadMessagesInThreadForAccountId,
   getLastNMessagesInThread,
 } = require('../models/messages')
 const { storePost, getPost, getPostsBatch } = require('../models/posts')
@@ -285,16 +285,18 @@ describe('Messages DB Tests', function() {
     expect(replyMessage.read).to.equal(false)
     expect(initialMessageThread.length).to.equal(1)
     // Get all unread messages
-    const unreadMessages = await getUnreadMessagesInThread(threadId1)
-    expect(unreadMessages.length).to.equal(2)
-    expect(unreadMessages[0].id).to.equal(initialMessageId)
-    expect(unreadMessages[0].account_id).to.equal(accountId1)
-    expect(unreadMessages[1].id).to.equal(replyMessageId)
-    expect(unreadMessages[1].account_id).to.equal(accountId2)
+    const unreadMessages1 = await getUnreadMessagesInThreadForAccountId(threadId1, accountId1)
+    expect(unreadMessages1.length).to.equal(1)
+    expect(unreadMessages1[0].id).to.equal(replyMessageId)
+    expect(unreadMessages1[0].account_id).to.equal(accountId2)
+    const unreadMessages2 = await getUnreadMessagesInThreadForAccountId(threadId1, accountId2)
+    expect(unreadMessages2.length).to.equal(1)
+    expect(unreadMessages2[0].id).to.equal(initialMessageId)
+    expect(unreadMessages2[0].account_id).to.equal(accountId1)
     // Update read status of message thread
-    const readMessages = await updateReadMessages(threadId1)
+    const readMessages = await updateReadMessages(threadId1, accountId1)
     // Get all unread messages
-    const unreadMessagesPost = await getUnreadMessagesInThread(threadId1)
+    const unreadMessagesPost = await getUnreadMessagesInThreadForAccountId(threadId1, accountId1)
     expect(unreadMessagesPost.length).to.equal(0)
     // Get last message info
     const lastMessage = await getLastNMessagesInThread(threadId1, 1)

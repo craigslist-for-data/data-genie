@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { createMessageThread, getMessageThreads, sendMessage, getMessages } = require('../services/messages')
+const { createMessageThread, getMessageThreads, sendMessage, getMessages, readMessages } = require('../services/messages')
 const { getAccountIdFromAccessToken } = require('../services/auth')
 const {
   authorizeAccessToken,
@@ -46,6 +46,17 @@ router.post('/', authorizeAccessTokenBody, async function (req, res) {
 router.get('/:threadId', authorizeAccessTokenForMessageThread, async function (req, res) {
   try {
     const messages = await getMessages(req.params.threadId)
+    return res.send(messages)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({error: 'Failed to fetch messages'})
+  }
+})
+
+// Get messages in thread
+router.post('/:threadId/read', authorizeAccessTokenForMessageThread, async function (req, res) {
+  try {
+    const messages = await readMessages(req.params.threadId, req.body.accountId)
     return res.send(messages)
   } catch (err) {
     console.error(err)

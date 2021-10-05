@@ -97,9 +97,9 @@ async function getMessagesInThread(threadId) {
           })
 }
 
-async function updateReadMessages(threadId) {
+async function updateReadMessages(threadId, accountId) {
   try {
-    const query = `UPDATE messages SET read = true WHERE thread_id = ${threadId}`
+    const query = `UPDATE messages SET read = true WHERE thread_id = ${threadId} and account_id != ${accountId}`
     const result = await submitTransaction(query)
     return result.rows
   } catch (err) {
@@ -108,8 +108,8 @@ async function updateReadMessages(threadId) {
   }
 }
 
-async function getUnreadMessagesInThread(threadId) {
-  const query = `SELECT id, account_id FROM messages WHERE thread_id = ${threadId} and read = false`
+async function getUnreadMessagesInThreadForAccountId(threadId, accountId) {
+  const query = `SELECT id, account_id FROM messages WHERE thread_id = ${threadId} and read = false and account_id != ${accountId}`
   return pool
           .query(query)
           .then(res => res.rows)
@@ -140,6 +140,6 @@ module.exports = {
   storeMessage,
   getMessagesInThread,
   updateReadMessages,
-  getUnreadMessagesInThread,
+  getUnreadMessagesInThreadForAccountId,
   getLastNMessagesInThread,
 }
