@@ -109,7 +109,7 @@ async function updateReadMessages(threadId) {
 }
 
 async function getUnreadMessagesInThread(threadId) {
-  const query = `SELECT id FROM messages WHERE thread_id = ${threadId} and read = false`
+  const query = `SELECT id, account_id FROM messages WHERE thread_id = ${threadId} and read = false`
   return pool
           .query(query)
           .then(res => res.rows)

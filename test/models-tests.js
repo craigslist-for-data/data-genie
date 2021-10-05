@@ -288,7 +288,9 @@ describe('Messages DB Tests', function() {
     const unreadMessages = await getUnreadMessagesInThread(threadId1)
     expect(unreadMessages.length).to.equal(2)
     expect(unreadMessages[0].id).to.equal(initialMessageId)
+    expect(unreadMessages[0].account_id).to.equal(accountId1)
     expect(unreadMessages[1].id).to.equal(replyMessageId)
+    expect(unreadMessages[1].account_id).to.equal(accountId2)
     // Update read status of message thread
     const readMessages = await updateReadMessages(threadId1)
     // Get all unread messages

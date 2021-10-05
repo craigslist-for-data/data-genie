@@ -62,7 +62,8 @@ async function getMessageThreads(accountId) {
         const accountInfo = await getAccountInfo(info.account_id)
         const postInfo = await getPost(info.post_id)
         const unreadMessages = await getUnreadMessagesInThread(info.thread_id)
-        const unreadMessagesCount = unreadMessages.length
+        const unreadMessagesFiltered = unreadMessages.filter(x => (x.account_id!=accountId))
+        const unreadMessagesCount = unreadMessagesFiltered.length
         const lastMessages = await getLastNMessagesInThread(info.thread_id, 1)
         const lastMessage = lastMessages[0]
         if (lastMessage) {
@@ -89,7 +90,10 @@ async function getMessageThreads(accountId) {
       }
     }))
     const returnInfo = threadInfoFull.filter(x => x)
-    return returnInfo
+    const returnInfoSorted = returnInfo.sort(function(a,b){
+      return new Date(b.last_message.created_at) - new Date(a.last_message.created_at)
+    })
+    return returnInfoSorted
   } catch (err) {
     console.error(err)
     throw new Error(err)
