@@ -65,22 +65,26 @@ async function getMessageThreads(accountId) {
         const unreadMessagesCount = unreadMessages.length
         const lastMessages = await getLastNMessagesInThread(info.thread_id, 1)
         const lastMessage = lastMessages[0]
-        return {
-          thread_id: info.thread_id,
-          unread_messages: unreadMessagesCount,
-          last_message: {
-            last_message: lastMessage.message,
-            sender_account_id: lastMessage.account_id,
-            created_at: lastMessage.created_at,
-          },
-          post: {
-            id: info.post_id,
-            brief_description: postInfo.brief_description,
-          },
-          account: {
-            id: accountInfo.id,
-            username: accountInfo.username,
-          },
+        if (lastMessage) {
+          return {
+            thread_id: info.thread_id,
+            unread_messages: unreadMessagesCount,
+            last_message: {
+              last_message: lastMessage.message,
+              sender_account_id: lastMessage.account_id,
+              created_at: lastMessage.created_at,
+            },
+            post: {
+              id: info.post_id,
+              brief_description: postInfo.brief_description,
+            },
+            account: {
+              id: accountInfo.id,
+              username: accountInfo.username,
+            },
+          }
+        } else {
+          return null
         }
       }
     }))

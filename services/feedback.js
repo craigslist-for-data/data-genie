@@ -7,7 +7,7 @@ async function submitFeedback(feedback) {
     const msg = {
       to: 'craigslistfordata@gmail.com',
       from: 'craigslistfordata@gmail.com',
-      subject: 'Data Genie User Feedback!',
+      subject: 'Data Genie site feedback!',
       text: `${feedback.message}`,
       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
     }
